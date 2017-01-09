@@ -6,7 +6,7 @@
 
 Server-side:
 
-```
+```js
 import { Server, op } from xhip
 
 export class App {
@@ -20,13 +20,13 @@ export class App {
     say
   })
 }
-app.use(new xhip.Server(App))
+app.use(xhip.Server(App))
 server.serve()
 ```
 
 Client-side:
 
-```
+```js
 import { App } from "./server"
 
 const client = new xhip.Client(App)
