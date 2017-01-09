@@ -10,15 +10,19 @@ Server-side:
 import { Server, op } from xhip
 
 export class App {
-  @op showAppName: () => ({
-    appName: "xhip example"
-  })
-  @op showAppVersion: () => ({
-    appVersion: 1
-  })
-  @op echo: say => ({
-    say
-  })
+  @op showAppName() {
+    return {
+      appName: "xhip example"
+    }
+  }
+  @op showAppVersion() {
+    return {
+      appVersion: 1
+    }
+  }
+  @op echo(say) {
+    return { say }
+  }
 }
 app.use(xhip.Server(App))
 server.serve()
