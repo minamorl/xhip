@@ -1,6 +1,5 @@
 {
   "name": "xhip",
-  "version": "0.0.1",
   "description": "API server framework for isomorphic age",
   "main": "./lib/src/index.js",
   "scripts": {
