@@ -1,5 +1,8 @@
 # Xhip
 
+[![npm version](https://badge.fury.io/js/xhip.svg)](https://badge.fury.io/js/xhip)
+
+
 ## About
 
 **Xhip** is a modern, isomorphic, operation-based web framework built top on express. For drawing the usage of this, see the codes:
@@ -7,7 +10,7 @@
 Server-side:
 
 ```js
-import { Server, op } from xhip
+import { Server, op } from "xhip"
 
 export class App {
   @op showAppName() {
@@ -32,6 +35,7 @@ server.serve()
 Client-side:
 
 ```js
+import { Client } from "xhip"
 import { app } from "./server"
 
 const client = new xhip.Client(app)
