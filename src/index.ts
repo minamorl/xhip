@@ -6,7 +6,7 @@ export class OperationFunction extends Function {
     public key: string
   ) {
     super()
-    let fn = function(arg: any) {
+    let fn = function(arg?: any) {
       let result = {}
       result[key] = arg
       return result
