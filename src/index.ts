@@ -6,7 +6,8 @@ export class OperationFunction extends Function {
     public key: string
   ) {
     super()
-    return new Proxy(this, {
+    const that = this
+    return new Proxy(that, {
       apply: function (target: any, thisArg: any, argumentsList: any) {
         let result = {}
         result[key] = argumentsList[0]

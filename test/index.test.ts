@@ -1,15 +1,9 @@
-import { op } from "../src/index"
+import { app } from "./app"
+import { op, OperationFunction } from "../src/index"
 import { assert } from "chai"
 
-// Check if op decorator is broken
-class TestBaseApp {
-  @op showAppName() {
-    return {
-      "appName": "Xhip"
-    }
-  }
-  @op echo(say: any) {
-    return {say}
-  }
-}
-const testBaseApp = new TestBaseApp()
+describe('op', () => {
+  it('should replace original function', () => {
+    assert.equal(app.echo instanceof OperationFunction, true)
+  })
+})
