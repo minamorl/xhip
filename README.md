@@ -24,16 +24,17 @@ export class App {
     return { say }
   }
 }
-app.use(xhip.Server(App))
+export const app = new App()
+app.use(new xhip.Server(app).app)
 server.serve()
 ```
 
 Client-side:
 
 ```js
-import { App } from "./server"
+import { app } from "./server"
 
-const client = new xhip.Client(App)
+const client = new xhip.Client(app)
 client.exec([
   App.showAppName(),
   App.showAppVersion(),
