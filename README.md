@@ -1,6 +1,6 @@
 # Xhip
 
-[![npm version](https://badge.fury.io/js/xhip.svg)](https://badge.fury.io/js/xhip)
+[![CircleCI](https://circleci.com/gh/minamorl/xhip.svg?style=svg)](https://circleci.com/gh/minamorl/xhip) [![npm version](https://badge.fury.io/js/xhip.svg)](https://badge.fury.io/js/xhip)
 
 
 ## About
