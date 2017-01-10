@@ -10,7 +10,8 @@
 Server-side:
 
 ```js
-import { Server, op } from "xhip"
+import { op } from "xhip"
+import { Server } from "xhip-server"
 
 export class App {
   @op showAppName() {
@@ -35,8 +36,7 @@ server.listen(8080)
 Client-side:
 
 ```js
-import { Client } from "xhip"
-import { app } from "./server"
+import { Client } from "xhip-client"
 
 const client = new xhip.Client("http://localhost:8080/")
 client.exec([
