@@ -1,12 +1,14 @@
 import * as express from "express"
 import * as bodyParser from "body-parser"
 import * as http from "http"
+import * as cors from "cors"
 import {OperationFunctions, operationFunctionSymbol} from "xhip"
 
 export class Server {
   app: express.Application
   constructor(appBase: any) {
     const app = express()
+    app.use(cors())
     app.use(bodyParser.json());
     const availableOperations = Object.getPrototypeOf(appBase)[operationFunctionSymbol] as OperationFunctions
     const keys: Array<string> = Object.keys(availableOperations).map(
