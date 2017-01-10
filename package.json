@@ -9,6 +9,9 @@
   },
   "author": "minamorl",
   "license": "MIT",
+  "files": [
+    "lib/src/"
+  ],
   "dependencies": {
     "@types/body-parser": "0.0.33",
     "@types/chai": "^3.4.34",
