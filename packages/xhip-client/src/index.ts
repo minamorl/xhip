@@ -12,6 +12,8 @@ export class Client {
       headers: {
         'Content-Type': 'application/json'
       },
+      mode: 'cors',
+      credentials: 'include',
       method: 'POST',
       body
     }).then(res => {
