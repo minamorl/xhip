@@ -1,10 +1,10 @@
 import * as express from "express"
 import * as http from "http"
-import { op, Server } from "../src/index"
+import { op, AppBase, Server, Client } from "../src/index"
 import "isomorphic-fetch"
 import { assert } from "chai"
 // Check if op decorator is broken
-class TestBaseApp {
+class TestBaseApp extends AppBase {
   @op showAppName() {
     return {
       "appName": "Xhip"
@@ -14,12 +14,12 @@ class TestBaseApp {
     return {say}
   }
 }
-
+const testBaseApp = new TestBaseApp()
 describe('Server', () => {
   let app: express.Application
   let server: http.Server
   beforeEach((done) => {
-    app = Server(TestBaseApp)
+    app = new Server(testBaseApp).app
     server = http.createServer(app)
     server.listen(0, done)
   })
@@ -28,7 +28,7 @@ describe('Server', () => {
   })
   it('can be mounted with express app', () => {
     const server = express()
-    server.use(Server(TestBaseApp))
+    server.use(new Server(testBaseApp).app)
   })
   it('returns 400 when received without __ship signature', () => {
     return fetch(`http://127.0.0.1:${server.address().port}/`, {
@@ -69,6 +69,31 @@ describe('Server', () => {
         appName: "Xhip",
         say: 'hi'
       }))
+    })
+  })
+})
+describe('Client', () => {
+  let app: express.Application
+  let server: http.Server
+  beforeEach((done) => {
+    app = new Server(testBaseApp).app
+    server = http.createServer(app)
+    server.listen(0, done)
+  })
+  afterEach((done) => {
+    server.close(done)
+  })
+  it('connect to an application and generate uri', () => {
+    const client = new Client(server, { ssl: false })
+    assert.strictEqual(client.uri, "http://"
+      + "127.0.0.1:"
+      + server.address().port + "/"
+    )
+  })
+  it('can execute from client', () => {
+    const client = new Client(server, { ssl: false })
+    return client.exec([testBaseApp.showAppName(), testBaseApp.echo("hi")]).then(res => {
+      assert.deepEqual(res, {say: "hi"})
     })
   })
 })
