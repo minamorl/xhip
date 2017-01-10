@@ -36,9 +36,9 @@ import { app } from "./server"
 
 const client = new xhip.Client(app)
 client.exec([
-  App.showAppName(),
-  App.showAppVersion(),
-  App.echo("hi")
+  app.showAppName(),
+  app.showAppVersion(),
+  app.echo("hi")
 ]).then(res => {
   // res will be like this:
   // {
