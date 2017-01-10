@@ -1,6 +1,6 @@
 import * as express from "express"
 import * as http from "http"
-import { op, Client, Server } from "../src/index"
+import { op, Server } from "../src/index"
 import "isomorphic-fetch"
 import { assert } from "chai"
 // Check if op decorator is broken
@@ -69,26 +69,6 @@ describe('Server', () => {
         appName: "Xhip",
         say: 'hi'
       }))
-    })
-  })
-})
-describe('Client', () => {
-  let app: express.Application
-  let server: http.Server
-  beforeEach((done) => {
-    app = new Server(testBaseApp).app
-    server = http.createServer(app)
-    server.listen(0, done)
-  })
-  afterEach((done) => {
-    server.close(done)
-  })
-  it('can execute from client', () => {
-    const client = new Client("http://"
-      + "127.0.0.1:"
-      + server.address().port, { ssl: false })
-    return client.exec([testBaseApp.showAppName(), testBaseApp.echo("hi")]).then(res => {
-      assert.deepEqual(res, {say: "hi"})
     })
   })
 })
