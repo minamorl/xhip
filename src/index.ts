@@ -1,5 +1,8 @@
 import "isomorphic-fetch"
 
+import { Server as _Server } from "./server"
+export const Server = _Server
+
 export type OperationFunctions = {[key: string]: OperationFunction}
 export const operationFunctionSymbol = Symbol('OperationFunction')
 export class OperationFunction extends Function {

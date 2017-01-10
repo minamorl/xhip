@@ -1,7 +1,6 @@
 import * as express from "express"
 import * as http from "http"
-import { op, Client } from "../src/index"
-import { Server } from "../src/server"
+import { op, Client, Server } from "../src/index"
 import "isomorphic-fetch"
 import { assert } from "chai"
 // Check if op decorator is broken
