@@ -83,15 +83,10 @@ describe('Client', () => {
   afterEach((done) => {
     server.close(done)
   })
-  it('connect to an application and generate uri', () => {
-    const client = new Client(server, { ssl: false })
-    assert.strictEqual(client.uri, "http://"
-      + "127.0.0.1:"
-      + server.address().port + "/"
-    )
-  })
   it('can execute from client', () => {
-    const client = new Client(server, { ssl: false })
+    const client = new Client("http://"
+      + "127.0.0.1:"
+      + server.address().port, { ssl: false })
     return client.exec([testBaseApp.showAppName(), testBaseApp.echo("hi")]).then(res => {
       assert.deepEqual(res, {say: "hi"})
     })

@@ -29,7 +29,7 @@ export class App {
 }
 export const app = new App()
 app.use(new xhip.Server(app).app)
-server.serve()
+server.listen(8080)
 ```
 
 Client-side:
@@ -38,7 +38,7 @@ Client-side:
 import { Client } from "xhip"
 import { app } from "./server"
 
-const client = new xhip.Client(app)
+const client = new xhip.Client("http://localhost:8080/")
 client.exec([
   app.showAppName(),
   app.showAppVersion(),

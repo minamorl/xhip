@@ -72,15 +72,7 @@ export class Server {
 }
 
 export class Client {
-  uri: string
-  constructor(private server: http.Server, private opts: { ssl: boolean }) {
-    let { address } = server.address()
-    if (address === "::") {
-      address = "127.0.0.1"
-    }
-    this.uri = "http" + (opts.ssl ? "s" : "") + "://"
-      + address + ":"
-      + server.address().port + "/"
+  constructor(public uri: string, public opts: { ssl: boolean }) {
   }
   exec = (ops: Array<any>) => {
     const body = JSON.stringify({
