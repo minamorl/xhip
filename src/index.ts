@@ -6,14 +6,13 @@ export class OperationFunction extends Function {
     public key: string
   ) {
     super()
-    const that = this
-    return new Proxy(that, {
-      apply: function (target: any, thisArg: any, argumentsList: any) {
-        let result = {}
-        result[key] = argumentsList[0]
-        return result
-      }
-    })
+    let fn = function(arg: any) {
+      let result = {}
+      result[key] = arg
+      return arg
+    }
+    Object.setPrototypeOf(fn, this)
+    return fn as any as OperationFunction
   }
 }
 
@@ -21,10 +20,6 @@ export const op = (target: any, propertyKey: string, descriptor: PropertyDescrip
   // Update descriptor with wrapper class
   if (!target[operationFunctionSymbol])
     target[operationFunctionSymbol] = {}
-  console.log("target")
-  console.log(target)
-  console.log("descriptor")
-  console.log(descriptor)
   descriptor.value = target[operationFunctionSymbol][propertyKey] = new OperationFunction(descriptor.value, propertyKey)
   // Add static function accessing across client side
   return descriptor
