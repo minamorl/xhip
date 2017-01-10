@@ -27,5 +27,5 @@
     "sinon": "^1.17.7",
     "typescript": "^2.1.4"
   },
-  "version": "0.0.1"
+  "version": "0.0.2"
 }
