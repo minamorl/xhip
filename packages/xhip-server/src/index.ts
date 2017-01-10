@@ -6,9 +6,9 @@ import {OperationFunctions, operationFunctionSymbol} from "xhip"
 
 export class Server {
   app: express.Application
-  constructor(appBase: any) {
+  constructor(appBase: any, corsOptions: cors.CorsOptions) {
     const app = express()
-    app.use(cors())
+    app.use(cors(corsOptions))
     app.use(bodyParser.json());
     const availableOperations = Object.getPrototypeOf(appBase)[operationFunctionSymbol] as OperationFunctions
     const keys: Array<string> = Object.keys(availableOperations).map(

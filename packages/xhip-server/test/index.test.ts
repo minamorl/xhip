@@ -20,7 +20,7 @@ describe('Server', () => {
   let app: express.Application
   let server: http.Server
   beforeEach((done) => {
-    app = new Server(testBaseApp).app
+    app = new Server(testBaseApp, {}).app
     server = http.createServer(app)
     server.listen(0, done)
   })
@@ -29,7 +29,7 @@ describe('Server', () => {
   })
   it('can be mounted with express app', () => {
     const server = express()
-    server.use(new Server(testBaseApp).app)
+    server.use(new Server(testBaseApp, {}).app)
   })
   it('returns 400 when received without __ship signature', () => {
     return fetch(`http://127.0.0.1:${server.address().port}/`, {
