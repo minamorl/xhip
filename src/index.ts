@@ -9,7 +9,7 @@ export class OperationFunction extends Function {
     let fn = function(arg: any) {
       let result = {}
       result[key] = arg
-      return arg
+      return result
     }
     Object.setPrototypeOf(fn, this)
     return fn as any as OperationFunction
