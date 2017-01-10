@@ -14,15 +14,16 @@
     "lib/src/"
   ],
   "devDependencies": {
+    "@types/isomorphic-fetch": "0.0.31",
+    "isomorphic-fetch": "^2.2.1",
+    "whatwg-fetch": "^2.0.1",
     "xhip": "0.0.5"
   },
   "dependencies": {
     "@types/chai": "^3.4.34",
-    "@types/isomorphic-fetch": "0.0.31",
     "@types/mocha": "^2.2.36",
     "@types/sinon": "^1.16.34",
     "chai": "^3.5.0",
-    "isomorphic-fetch": "^2.2.1",
     "mocha": "^3.2.0",
     "sinon": "^1.17.7",
     "typescript": "^2.1.4"

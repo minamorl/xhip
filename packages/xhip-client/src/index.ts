@@ -1,4 +1,4 @@
-import "isomorphic-fetch"
+import "whatwg-fetch"
 
 export class Client {
   constructor(public uri: string, public opts: { ssl: boolean }) {
