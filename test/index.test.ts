@@ -1,10 +1,11 @@
 import * as express from "express"
 import * as http from "http"
-import { op, AppBase, Server, Client } from "../src/index"
+import { op, Client } from "../src/index"
+import { Server } from "../src/server"
 import "isomorphic-fetch"
 import { assert } from "chai"
 // Check if op decorator is broken
-class TestBaseApp extends AppBase {
+class TestBaseApp {
   @op showAppName() {
     return {
       "appName": "Xhip"

@@ -1,11 +1,8 @@
-import * as express from "express"
-import * as bodyParser from "body-parser"
-import * as http from "http"
 import "isomorphic-fetch"
 
-type OperationFunctions = {[key: string]: OperationFunction}
-const operationFunctionSymbol = Symbol('OperationFunction')
-class OperationFunction extends Function {
+export type OperationFunctions = {[key: string]: OperationFunction}
+export const operationFunctionSymbol = Symbol('OperationFunction')
+export class OperationFunction extends Function {
   constructor(
     public operation: (args: any) => any,
     public key: string
@@ -28,47 +25,6 @@ export const op = (target: any, propertyKey: string, descriptor: PropertyDescrip
   descriptor.value = target[operationFunctionSymbol][propertyKey] = new OperationFunction(descriptor.value, propertyKey)
   // Add static function accessing across client side
   return descriptor
-}
-
-export class AppBase {
-  constructor() {
-    this[operationFunctionSymbol] = {} as OperationFunctions
-  }
-}
-
-export class Server {
-  app: express.Application
-  constructor(appBase: any) {
-    const app = express()
-    app.use(bodyParser.json());
-    const availableOperations = Object.getPrototypeOf(appBase)[operationFunctionSymbol] as OperationFunctions
-    const keys: Array<string> = Object.keys(availableOperations).map(
-      x => availableOperations[x].key)
-
-    app.post('/', (req, res) => {
-      if (req.body['__xhip']) {
-        let result = {}
-        if (!req.body['operations']) {
-          return res.sendStatus(200)
-        }
-        for (const key of Object.getOwnPropertyNames(
-          req.body['operations']
-        )) {
-          if (keys.indexOf(key) !== -1) {
-            result = Object.assign(result,
-              Object.getPrototypeOf(appBase)[operationFunctionSymbol][key].operation(
-                req.body['operations'][key]
-              )
-            )
-          }
-        }
-        res.json(result)
-      } else {
-        return res.sendStatus(400)
-      }
-    })
-    this.app = app
-  }
 }
 
 export class Client {
