@@ -8,7 +8,7 @@ export class OperationFunction extends Function {
     super()
     let fn = function(arg?: any) {
       let result = {}
-      result[key] = arg
+      result[key] = arg ? arg : null
       return result
     }
     Object.setPrototypeOf(fn, this)
