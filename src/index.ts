@@ -21,6 +21,10 @@ export const op = (target: any, propertyKey: string, descriptor: PropertyDescrip
   // Update descriptor with wrapper class
   if (!target[operationFunctionSymbol])
     target[operationFunctionSymbol] = {}
+  console.log("target")
+  console.log(target)
+  console.log("descriptor")
+  console.log(descriptor)
   descriptor.value = target[operationFunctionSymbol][propertyKey] = new OperationFunction(descriptor.value, propertyKey)
   // Add static function accessing across client side
   return descriptor
