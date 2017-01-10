@@ -1,0 +1,28 @@
+{
+  "name": "xhip-client",
+  "description": "HTTP Client for Xhip framework",
+  "main": "./lib/src/index.js",
+  "types": "./lib/src/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && mocha ./lib/test/**/*.js",
+    "prepublish": "npm run build"
+  },
+  "author": "minamorl",
+  "license": "MIT",
+  "files": [
+    "lib/src/"
+  ],
+  "dependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/isomorphic-fetch": "0.0.31",
+    "@types/mocha": "^2.2.36",
+    "@types/sinon": "^1.16.34",
+    "chai": "^3.5.0",
+    "isomorphic-fetch": "^2.2.1",
+    "mocha": "^3.2.0",
+    "sinon": "^1.17.7",
+    "typescript": "^2.1.4",
+    "xhip": "0.0.5"
+  }
+}
