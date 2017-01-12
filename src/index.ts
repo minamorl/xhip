@@ -8,8 +8,8 @@ export class OperationFunction extends Function {
   ) {
     super()
     this.operation = (args: any) => {
-      if (typeof require === "function")
-        root[Symbol.for("loader")] = require
+      if (typeof root["require"] === "function")
+        root[Symbol.for("loader")] = root["require"]
       return operation(args)
     }
     let fn = function(arg?: any) {
