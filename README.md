@@ -9,7 +9,7 @@
 
 ## Example
 
-You can see example in [xhip-example](https://github.com/xhip-example).
+You can see React example in [xhip-examples](https://github.com/xhip-examples).
 
 App(app.js):
 
