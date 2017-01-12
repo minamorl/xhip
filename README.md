@@ -7,11 +7,12 @@
 
 **Xhip** is a modern, isomorphic, operation-based web framework built top on express. For drawing the usage of this, see the codes:
 
-Server-side:
+## Example
+
+App(app.js):
 
 ```js
 import { op } from "xhip"
-import { Server } from "xhip-server"
 
 export class App {
   @op showAppName() {
@@ -29,16 +30,28 @@ export class App {
   }
 }
 export const app = new App()
-app.use(new xhip.Server(app).app)
-server.listen(8080)
 ```
 
-Client-side:
+Server-side(server.js):
+
+```js
+import { Server } from "xhip-server"
+import { app } from "./app.js"
+
+new xhip.Server(app, {
+  origin: 'http://localhost:21000', // for CORS support
+  credentials: true,
+}).app.listen(8080)
+```
+
+Then you can access to Xhip server via xhip-client.
+
+Client-side(client.js):
 
 ```js
 import { Client } from "xhip-client"
 
-const client = new xhip.Client("http://localhost:8080/")
+const client = new xhip.Client("http://localhost:8080/", { ssl: false })
 client.exec([
   app.showAppName(),
   app.showAppVersion(),
@@ -53,4 +66,11 @@ client.exec([
 })
 ```
 
-All operations are transformed into one endpoint. Any operation must returns JSON object which can be combined with other operations.
+## How it works
+All operations are transformed into one endpoint. Decorator `op` automatically
+generate server/client compatible function. From client side, it will become to
+argument generator which will be posted into server.
+
+
+## Limitation
+Any operation must returns JSON object which can be combined with other operations.
