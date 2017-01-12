@@ -5,9 +5,11 @@
 
 ## About
 
-**Xhip** is a modern, isomorphic, operation-based web framework built top on express. For drawing the usage of this, see the codes:
+**Xhip** is a modern, isomorphic, operation-based web framework built top on express. For drawing the usage of this, see the codes below.
 
 ## Example
+
+You can see example in [xhip-example](https://github.com/xhip-example).
 
 App(app.js):
 
