@@ -24,6 +24,9 @@
     "sinon": "^1.17.7",
     "typescript": "^2.1.4"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/window-or-global": "^1.0.0",
+    "window-or-global": "^1.0.1"
+  },
   "version": "0.0.14"
 }

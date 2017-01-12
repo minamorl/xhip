@@ -1,3 +1,4 @@
+import * as root from "window-or-global"
 export type OperationFunctions = {[key: string]: OperationFunction}
 export const operationFunctionSymbol = Symbol.for('OperationFunction')
 export class OperationFunction extends Function {
@@ -6,6 +7,10 @@ export class OperationFunction extends Function {
     public key: string
   ) {
     super()
+    this.operation = (args: any) => {
+      root[Symbol.for("loader")] = require
+      return operation(args)
+    }
     let fn = function(arg?: any) {
       let result = {}
       result[key] = arg ? arg : null
@@ -23,4 +28,12 @@ export const op = (target: any, propertyKey: string, descriptor: PropertyDescrip
   descriptor.value = target[operationFunctionSymbol][propertyKey] = new OperationFunction(descriptor.value, propertyKey)
   // Add static function accessing across client side
   return descriptor
+}
+
+export function load<T>(moduleName: string): T {
+  const loader = root[Symbol.for("loader")]
+  if (loader)
+    return loader(moduleName)
+  let x: any = new Proxy(function() { return x }, {get: () => x, set: () => x})
+  return x as any as T
 }
