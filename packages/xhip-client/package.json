@@ -19,16 +19,15 @@
     "@types/mocha": "^2.2.36",
     "@types/sinon": "^1.16.34",
     "@types/whatwg-fetch": "0.0.33",
-    "express": "^4.14.0",
-    "xhip": "0.0.7"
-  },
-  "dependencies": {
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
     "sinon": "^1.17.7",
     "typescript": "^2.1.4",
-    "whatwg-fetch": "^2.0.1",
-    "xhip-server": "0.0.3"
+    "express": "^4.14.0",
+    "xhip": "0.0.7"
+  },
+  "dependencies": {
+    "whatwg-fetch": "^2.0.1"
   },
   "version": "0.0.7"
 }
