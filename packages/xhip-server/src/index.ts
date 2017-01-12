@@ -14,7 +14,7 @@ export class Server {
     const keys: Array<string> = Object.keys(availableOperations).map(
       x => availableOperations[x].key)
 
-    app.post('/', (req, res) => {
+    app.post('/', async (req, res) => {
       if (req.body['__xhip']) {
         let result = {}
         if (!req.body['operations']) {
@@ -25,7 +25,7 @@ export class Server {
         )) {
           if (keys.indexOf(key) !== -1) {
             result = Object.assign(result,
-              Object.getPrototypeOf(appBase)[operationFunctionSymbol][key].operation(
+              await Object.getPrototypeOf(appBase)[operationFunctionSymbol][key].operation(
                 req.body['operations'][key]
               )
             )
