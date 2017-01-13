@@ -14,7 +14,8 @@ You can see React example in [xhip-example](https://github.com/minamorl/xhip-exa
 App(app.js):
 
 ```js
-import { op } from "xhip"
+import { op, load } from "xhip"
+const request = load("request")
 
 export class App {
   @op showAppName() {
@@ -26,6 +27,16 @@ export class App {
     return {
       appVersion: 1
     }
+  }
+  @op getServerIP() {
+    return new Promise((resolve, reject) =>
+      request.get('https://api.ipify.org?format=json', (error, response, body) => {
+        if (error) reject(error)
+        resolve({ ip: JSON.parse(body).ip })
+      })
+    ).catch(err => {
+      console.log(err)
+    })
   }
   @op echo(say) {
     return { say }
@@ -57,13 +68,15 @@ const client = new xhip.Client("http://localhost:8080/", { ssl: false })
 client.exec([
   app.showAppName(),
   app.showAppVersion(),
-  app.echo("hi")
+  app.echo("hi"),
+  app.getServerIP()
 ]).then(res => {
   // res will be like this:
   // {
   //  appName: "xhip example",
   //  appVersion: 1,
   //  say: hi,
+  //  ip: ***.***.***.***
   // }
 })
 ```
@@ -75,4 +88,5 @@ argument generator which will be posted into server.
 
 
 ## Limitation
-Any operation must returns JSON object which can be combined with other operations.
+- Any operation must returns JSON object which can be combined with other operations.
+- Not as usual importation, we have to use `Xhip.load` for support isomorphism inside app.
