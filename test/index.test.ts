@@ -39,29 +39,27 @@ describe('OperationFunction', () => {
 })
 describe('load', () => {
   it('should be strongly typed as original', () => {
+    root[Symbol.for("loader")]
     const chai = load<typeof _chai>("chai")
     chai.assert.equal
   })
   it('should be get anything in property', () => {
-    const sample = load<any>("sample")
+    const sample = load<any>("sample", false)
     assert.isFunction(
       sample.sample.sample.sample.sample.sample.sample.sample
     )
   })
   it('should be set anything in property', () => {
-    const sample = load<any>("sample")
+    const sample = load<any>("sample", false)
     sample.sample.sample.sample.sample.sample.sample.sample = "a"
   })
   it('should be callable in property', () => {
-    const sample = load<any>("sample")
+    const sample = load<any>("sample", false)
     assert.isFunction(
       sample.sample.sample.sample.sample.sample.sample.sample("test")
     )
   })
-  it('should be require actual module when global[Symbol.for("module")] is set', () => {
-    root[Symbol.for("loader")] = require
-    const chai1 = load<any>("chai")
-    assert.isNotFunction(chai1.assert.broken)
-    root[Symbol.for("loader")] = undefined
+  it('should be require actual module from', () => {
+    assert.throws(() => load<any>("sample"))
   })
 })

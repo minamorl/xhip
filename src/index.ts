@@ -3,15 +3,10 @@ export type OperationFunctions = {[key: string]: OperationFunction}
 export const operationFunctionSymbol = Symbol.for('OperationFunction')
 export class OperationFunction extends Function {
   constructor(
-    public operation: (args: any) => any,
+    public operation: (args: any) => Promise<any> | any,
     public key: string
   ) {
     super()
-    this.operation = (args: any) => {
-      if (typeof root["require"] === "function")
-        root[Symbol.for("loader")] = root["require"]
-      return operation(args)
-    }
     let fn = function(arg?: any) {
       let result = {}
       result[key] = arg ? arg : null
@@ -31,10 +26,14 @@ export const op = (target: any, propertyKey: string, descriptor: PropertyDescrip
   return descriptor
 }
 
-export function load<T>(moduleName: string): T {
+export function load<T>(moduleName: string, load=true): T {
   const loader = root[Symbol.for("loader")]
-  if (loader)
+  if (load && loader === undefined && global && module && typeof module["require"] === "function")
+    return module["require"](moduleName)
+  else if (load && loader) {
     return loader(moduleName)
-  let x: any = new Proxy(function() { return x }, {get: () => x, set: () => x})
-  return x as any as T
+  } else {
+    let x: any = new Proxy(function() { return x }, {get: () => x, set: () => x})
+    return x as any as T
+  }
 }
