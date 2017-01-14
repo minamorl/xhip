@@ -33,7 +33,26 @@ export function load<T>(moduleName: string, load=true): T {
   else if (load && loader) {
     return loader(moduleName)
   } else {
-    let x: any = new Proxy(function() { return x }, {get: () => x, set: () => x})
+    let x: any = new Proxy((() => {
+      return function() {
+        Object.setPrototypeOf(x, {
+          valueOf: () => 1
+        })
+        return x
+      }
+    })(), {
+      get: (target: any, name: any) => {
+        return (function() {
+          if (name === Symbol.toPrimitive)
+            return () => 1
+          return x
+        })()
+      },
+      set: () => x
+    })
+    Object.setPrototypeOf(x, {
+      valueOf: function () { return 1 }
+    })
     return x as any as T
   }
 }

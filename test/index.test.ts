@@ -62,4 +62,12 @@ describe('load', () => {
   it('should be require actual module from', () => {
     assert.throws(() => load<any>("sample"))
   })
+  it('should be work as integer', () => {
+    const sample = load<any>("sample", false)
+    assert.doesNotThrow(() => sample.x + 1)
+  })
+  it('should be work as string', () => {
+    const sample = load<any>("sample", false)
+    assert.doesNotThrow(() => sample.x + "a")
+  })
 })
