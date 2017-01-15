@@ -120,7 +120,7 @@ describe('Server', () => {
     })
 
     socket.on('message', msg => {
-      assert.deepEqual(JSON.parse(msg), { say: "hello" })
+      assert.deepEqual(JSON.parse(msg), { echo: { say: "hello" }})
       done()
     })
   })

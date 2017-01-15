@@ -32,7 +32,7 @@ export class Server {
     })
     this.app = app
   }
-  async getOperationResult(operations: any) {
+  async getOperationResult(operations: any, isWebSocket=false) {
     let result = {}
     const availableOperations = Object.getPrototypeOf(this.appBase)[operationFunctionSymbol] as OperationFunctions
     const keys: Array<string> = Object.keys(availableOperations).map(
@@ -40,11 +40,17 @@ export class Server {
 
     for (const key of Object.getOwnPropertyNames(operations)) {
       if (keys.indexOf(key) !== -1) {
-        result = Object.assign(result,
-          await Object.getPrototypeOf(this.appBase)[operationFunctionSymbol][key].operation(
-            operations[key]
-          )
+        const operated = await Object.getPrototypeOf(this.appBase)[operationFunctionSymbol][key].operation(
+          operations[key]
         )
+        if (!isWebSocket)
+          result = Object.assign(result,
+            operated
+          )
+        else
+          result = Object.assign(result,
+            { [key]: operated }
+          )
       }
     }
     return result
@@ -54,7 +60,7 @@ export class Server {
     const expressWs = require('express-ws')(this.app, this.server)
     this.app['ws']('/ws', (ws: ws, req: express.Request) => {
       ws.on('message', message => {
-        this.getOperationResult(JSON.parse(message)['operations'])
+        this.getOperationResult(JSON.parse(message)['operations'], true)
           .then((result: any) => ws.send(JSON.stringify(result)))
       })
     })
