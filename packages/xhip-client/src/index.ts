@@ -1,5 +1,4 @@
 import "whatwg-fetch"
-import * as WebSocket from "ws"
 
 export class Client {
   socket: WebSocket
