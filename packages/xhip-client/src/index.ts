@@ -11,7 +11,7 @@ export class Client {
       for (let x of this.subscriptions) {
         const { target } = x
         const { receiver } = x
-        if (Object.keys(parsed).indexOf(target.key) > -1) {
+        if (target.some((x: any) => Object.keys(parsed).indexOf(x.key) > -1)) {
           receiver(parsed)
         }
       }
