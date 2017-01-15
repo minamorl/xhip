@@ -1,6 +1,8 @@
 import "whatwg-fetch"
+import * as WebSocket from "ws"
 
 export class Client {
+  socket: WebSocket
   constructor(public uri: string, public opts: { ssl: boolean }) {
   }
   exec = (ops: Array<any>) => {
@@ -19,6 +21,22 @@ export class Client {
     }).then(res => {
       if (res.status >= 400) return Promise.reject(res)
       return res.json()
+    })
+  }
+  subscribe(context: (exec: (ops: Array<any>) => any) => void) {
+    const prefix = this.opts.ssl ? 'wss' : 'ws'
+    let isOpen = false
+    this.socket = new WebSocket(prefix + "://" + new URL(this.uri).host + "/ws")
+    const exec = (ops: Array<any>) => {
+      this.socket.send(JSON.stringify({
+        'operations': Object.assign({}, ...ops)
+      }))
+      this.socket.on('message', msg => {
+        return JSON.parse(msg)
+      })
+    }
+    this.socket.on('open', () => {
+      context(exec)
     })
   }
 }
