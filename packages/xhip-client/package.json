@@ -29,5 +29,5 @@
     "@types/whatwg-fetch": "0.0.33",
     "whatwg-fetch": "^2.0.1"
   },
-  "version": "0.0.12"
+  "version": "0.0.13"
 }
