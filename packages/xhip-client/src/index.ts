@@ -2,7 +2,7 @@ import "whatwg-fetch"
 
 export class Client {
   socket: WebSocket
-  subscriptions: any[]
+  subscriptions: any[] = []
   constructor(public uri: string, public opts: { ssl: boolean }) {
     const prefix = this.opts.ssl ? 'wss' : 'ws'
     this.socket = new WebSocket(prefix + "://" + new URL(this.uri).host + "/ws")
