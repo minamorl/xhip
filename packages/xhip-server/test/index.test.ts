@@ -5,6 +5,7 @@ import "isomorphic-fetch"
 import { assert } from "chai"
 import { op } from "xhip"
 import * as request from "request"
+import * as WebSocket from "ws"
 
 class TestBaseApp {
   @op showAppName() {
@@ -18,42 +19,40 @@ class TestBaseApp {
   @op asyncfn() {
     return Promise.resolve({ supportAsync: "yes" })
   }
-  @op getServerIP() {
-    return new Promise((resolve, reject) =>
-      request.get('https://api.ipify.org?format=json', (error, response, body) => {
-        if (error) reject(error)
-        resolve({ ip: JSON.parse(body).ip })
-      })
-    ).catch(err => {
-      console.log(err)
-    })
+  @op ping() {
+    return {
+      "ping": "pong"
+    }
   }
 }
 const testBaseApp = new TestBaseApp()
 describe('Server', () => {
-  let app: express.Application
-  let server: http.Server
+  let app: Server
+  let socket: WebSocket
   beforeEach((done) => {
-    app = new Server(testBaseApp, {}).app
-    server = http.createServer(app)
-    server.listen(0, done)
+    app = new Server(testBaseApp, {})
+    app.listen(0, () => {
+      socket = new WebSocket(`ws://127.0.0.1:${app.server.address().port}/ws`)
+      done()
+    })
   })
   afterEach((done) => {
-    server.close(done)
+    app.server.close()
+    done()
   })
   it('can be mounted with express app', () => {
     const server = express()
     server.use(new Server(testBaseApp, {}).app)
   })
   it('returns 400 when received without __ship signature', () => {
-    return fetch(`http://127.0.0.1:${server.address().port}/`, {
+    return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
       method: 'POST'
     }).then((res) => {
       assert.strictEqual(res.status, 400)
     })
   })
   it('returns 200 with correct calls', () => {
-    return fetch(`http://127.0.0.1:${server.address().port}/`, {
+    return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -66,7 +65,7 @@ describe('Server', () => {
     })
   })
   it('returns transformed json', () => {
-    return fetch(`http://127.0.0.1:${server.address().port}/`, {
+    return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -87,7 +86,7 @@ describe('Server', () => {
     })
   })
   it('can handle async function', () => {
-    return fetch(`http://127.0.0.1:${server.address().port}/`, {
+    return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -96,15 +95,33 @@ describe('Server', () => {
         '__xhip': true,
         operations: {
           echo: "hello",
-          getServerIP: null
         }
       })
     }).then((res) => {
       assert.strictEqual(res.status, 200)
       return res.json().then(x => assert.deepEqual(x, {
         say: "hello",
-        ip: "yes",
       }))
+    })
+  })
+  it('can handle WebSocket request', (done) => {
+    socket.on('open', () => {
+      done()
+    })
+  })
+
+  it('can handle WebSocket request', (done) => {
+    socket.on('open', () => {
+      socket.send(JSON.stringify({
+        operations: {
+          echo: "hello",
+        }
+      }))
+    })
+
+    socket.on('message', msg => {
+      assert.deepEqual(JSON.parse(msg), { say: "hello" })
+      done()
     })
   })
 })
