@@ -6,8 +6,8 @@ export class Client {
   constructor(public uri: string, public opts: { ssl: boolean }) {
     const prefix = this.opts.ssl ? 'wss' : 'ws'
     this.socket = new WebSocket(prefix + "://" + new URL(this.uri).host + "/ws")
-    this.socket.on('message', msg => {
-      const parsed = JSON.parse(msg)
+    this.socket.onmessage = (ev) => {
+      const parsed = JSON.parse(ev.data)
       for (const x of this.subscriptions) {
         const { target } = x
         const { receiver } = x
@@ -15,7 +15,7 @@ export class Client {
           receiver(parsed)
         }
       }
-    })
+    }
   }
   exec = (ops: Array<any>) => {
     const body = JSON.stringify({
