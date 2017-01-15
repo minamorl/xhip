@@ -8,7 +8,7 @@ export class Client {
     this.socket = new WebSocket(prefix + "://" + new URL(this.uri).host + "/ws")
     this.socket.onmessage = (ev) => {
       const parsed = JSON.parse(ev.data)
-      for (const x of this.subscriptions) {
+      for (let x of this.subscriptions) {
         const { target } = x
         const { receiver } = x
         if (Object.keys(parsed).indexOf(target.key) > -1) {
