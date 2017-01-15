@@ -8,11 +8,12 @@ export class Client {
     this.socket = new WebSocket(prefix + "://" + new URL(this.uri).host + "/ws")
     this.socket.onmessage = (ev) => {
       const parsed = JSON.parse(ev.data)
+      const allExecutedOperations = Object.keys(parsed)
       for (let x of this.subscriptions) {
         const { target } = x
         const { receiver } = x
-        if (target.some((x: any) => Object.keys(parsed).indexOf(x.key) > -1)) {
-          receiver(parsed)
+        if (target.some((y: any) => allExecutedOperations.indexOf(y.key) !== -1)) {
+          receiver(Object.assign({}, ...Object.keys(parsed).map(k => parsed[k])))
         }
       }
     }
