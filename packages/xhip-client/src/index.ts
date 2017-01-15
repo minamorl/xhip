@@ -3,7 +3,20 @@ import * as WebSocket from "ws"
 
 export class Client {
   socket: WebSocket
+  subscriptions: any[]
   constructor(public uri: string, public opts: { ssl: boolean }) {
+    const prefix = this.opts.ssl ? 'wss' : 'ws'
+    this.socket = new WebSocket(prefix + "://" + new URL(this.uri).host + "/ws")
+    this.socket.on('message', msg => {
+      const parsed = JSON.parse(msg)
+      for (const x of this.subscriptions) {
+        const { target } = x
+        const { receiver } = x
+        if (Object.keys(parsed).indexOf(target.key) > -1) {
+          receiver(parsed)
+        }
+      }
+    })
   }
   exec = (ops: Array<any>) => {
     const body = JSON.stringify({
@@ -23,21 +36,20 @@ export class Client {
       return res.json()
     })
   }
-  subscribe(context: (exec: (ops: Array<any>) => any) => void) {
-    const prefix = this.opts.ssl ? 'wss' : 'ws'
-    let isOpen = false
-    this.socket = new WebSocket(prefix + "://" + new URL(this.uri).host + "/ws")
-    const exec = (ops: Array<any>) => {
+  get isSocketOpen() {
+    return this.socket.readyState === WebSocket.OPEN
+  }
+  subscribe(target: Array<any>, receiver: Function) {
+    this.subscriptions.push({
+      target,
+      receiver
+    })
+  }
+  send(ops: Array<any>): void {
+    if(this.isSocketOpen) {
       this.socket.send(JSON.stringify({
         'operations': Object.assign({}, ...ops)
       }))
-      return new Promise((resolve, reject) =>
-        this.socket.on('message', msg => {
-          return resolve(JSON.parse(msg))
-        }))
     }
-    this.socket.on('open', () => {
-      context(exec)
-    })
   }
 }
