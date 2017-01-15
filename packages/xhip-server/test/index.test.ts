@@ -4,6 +4,7 @@ import { Server } from "../src/index"
 import "isomorphic-fetch"
 import { assert } from "chai"
 import { op } from "xhip"
+import * as request from "request"
 
 class TestBaseApp {
   @op showAppName() {
@@ -13,6 +14,19 @@ class TestBaseApp {
   }
   @op echo(say: any) {
     return {say}
+  }
+  @op asyncfn() {
+    return Promise.resolve({ supportAsync: "yes" })
+  }
+  @op getServerIP() {
+    return new Promise((resolve, reject) =>
+      request.get('https://api.ipify.org?format=json', (error, response, body) => {
+        if (error) reject(error)
+        resolve({ ip: JSON.parse(body).ip })
+      })
+    ).catch(err => {
+      console.log(err)
+    })
   }
 }
 const testBaseApp = new TestBaseApp()
@@ -61,7 +75,7 @@ describe('Server', () => {
         '__xhip': true,
         operations: {
           showAppName: null,
-          echo: "hi"
+          echo: "hi",
         }
       })
     }).then((res) => {
@@ -69,6 +83,27 @@ describe('Server', () => {
       return res.json().then(x => assert.deepEqual(x, {
         appName: "Xhip",
         say: 'hi'
+      }))
+    })
+  })
+  it('can handle async function', () => {
+    return fetch(`http://127.0.0.1:${server.address().port}/`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        '__xhip': true,
+        operations: {
+          echo: "hello",
+          getServerIP: null
+        }
+      })
+    }).then((res) => {
+      assert.strictEqual(res.status, 200)
+      return res.json().then(x => assert.deepEqual(x, {
+        say: "hello",
+        ip: "yes",
       }))
     })
   })
