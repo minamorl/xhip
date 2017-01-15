@@ -31,9 +31,10 @@ export class Client {
       this.socket.send(JSON.stringify({
         'operations': Object.assign({}, ...ops)
       }))
-      this.socket.on('message', msg => {
-        return JSON.parse(msg)
-      })
+      return new Promise((resolve, reject) =>
+        this.socket.on('message', msg => {
+          return resolve(JSON.parse(msg))
+        }))
     }
     this.socket.on('open', () => {
       context(exec)
