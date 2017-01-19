@@ -1,4 +1,5 @@
 import * as root from "window-or-global"
+import * as express from "express"
 export type OperationFunctions = {[key: string]: OperationFunction}
 export const operationFunctionSymbol = Symbol.for('OperationFunction')
 export class OperationFunction extends Function {
@@ -17,13 +18,48 @@ export class OperationFunction extends Function {
   }
 }
 
+export const broadcast = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  if (!descriptor.value)
+    throw new TypeError("broadcast decorator should apply to method")
+  descriptor.value[Symbol.for("broadcast")] = true
+  return descriptor
+}
+
 export const op = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  if (!descriptor.value)
+    throw new TypeError("broadcast decorator should apply to method")
   // Update descriptor with wrapper class
   if (!target[operationFunctionSymbol])
     target[operationFunctionSymbol] = {}
   descriptor.value = target[operationFunctionSymbol][propertyKey] = new OperationFunction(descriptor.value, propertyKey)
   // Add static function accessing across client side
   return descriptor
+}
+
+export const request = mock() as any as express.Request
+
+export function mock() {
+  let x: any =  new Proxy((() => {
+    return function() {
+      Object.setPrototypeOf(x, {
+        valueOf: () => 1
+      })
+      return x
+    }
+  })(), {
+    get: (target: any, name: any) => {
+      return (function() {
+        if (name === Symbol.toPrimitive)
+          return () => 1
+        return x
+      })()
+    },
+    set: () => x
+  })
+  Object.setPrototypeOf(x, {
+    valueOf: function () { return 1 }
+  })
+  return x
 }
 
 export function load<T>(moduleName: string, load=true): T {
@@ -33,26 +69,6 @@ export function load<T>(moduleName: string, load=true): T {
   else if (load && loader) {
     return loader(moduleName)
   } else {
-    let x: any = new Proxy((() => {
-      return function() {
-        Object.setPrototypeOf(x, {
-          valueOf: () => 1
-        })
-        return x
-      }
-    })(), {
-      get: (target: any, name: any) => {
-        return (function() {
-          if (name === Symbol.toPrimitive)
-            return () => 1
-          return x
-        })()
-      },
-      set: () => x
-    })
-    Object.setPrototypeOf(x, {
-      valueOf: function () { return 1 }
-    })
-    return x as any as T
+    return mock() as any as T
   }
 }

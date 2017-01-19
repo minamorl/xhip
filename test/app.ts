@@ -1,4 +1,4 @@
-import { op } from "../src/index"
+import { op, broadcast, request } from "../src/index"
 
 export class TestBaseApp {
   @op showAppName() {
@@ -8,6 +8,10 @@ export class TestBaseApp {
   }
   @op echo(say: any) {
     return {say}
+  }
+  @broadcast
+  @op cast() {
+    return {}
   }
 }
 export const app = new TestBaseApp()

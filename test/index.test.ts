@@ -1,6 +1,6 @@
 import * as root from "window-or-global"
 import { app } from "./app"
-import { op, OperationFunction, load } from "../src/index"
+import { op, OperationFunction, load, mock } from "../src/index"
 import { assert } from "chai"
 // import type definition only
 import * as _chai from "chai"
@@ -43,20 +43,10 @@ describe('load', () => {
     const chai = load<typeof _chai>("chai")
     chai.assert.equal
   })
-  it('should be get anything in property', () => {
+  it('should return mock if second argument is false', () => {
     const sample = load<any>("sample", false)
     assert.isFunction(
       sample.sample.sample.sample.sample.sample.sample.sample
-    )
-  })
-  it('should be set anything in property', () => {
-    const sample = load<any>("sample", false)
-    sample.sample.sample.sample.sample.sample.sample.sample = "a"
-  })
-  it('should be callable in property', () => {
-    const sample = load<any>("sample", false)
-    assert.isFunction(
-      sample.sample.sample.sample.sample.sample.sample.sample("test")
     )
   })
   it('should be require actual module from', () => {
@@ -69,5 +59,26 @@ describe('load', () => {
   it('should be work as string', () => {
     const sample = load<any>("sample", false)
     assert.doesNotThrow(() => sample.x + "a")
+  })
+})
+describe('mock', () => {
+  const sample = mock()
+  it('should be get anything in property', () => {
+    assert.isFunction(
+      sample.sample.sample.sample.sample.sample.sample.sample
+    )
+  })
+  it('should be set anything in property', () => {
+    sample.sample.sample.sample.sample.sample.sample.sample = "a"
+  })
+  it('should be callable in property', () => {
+    assert.isFunction(
+      sample.sample.sample.sample.sample.sample.sample.sample("test")
+    )
+  })
+})
+describe('broadcast', () => {
+  it('should append @@broadcast property', () => {
+    assert.isTrue(app.cast[Symbol.for('broadcast')])
   })
 })
