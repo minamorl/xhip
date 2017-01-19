@@ -23,7 +23,7 @@ export class Server {
         if (!req.body['operations']) {
           return res.sendStatus(200)
         }
-        const result = await this.getOperationResult(req.body['operations'])
+        const result = await this.getOperationResult(req.body['operations'], req)
         res.json(result)
       } else {
         return res.sendStatus(400)
@@ -31,15 +31,15 @@ export class Server {
     })
     this.app = app
   }
-  async getOperationResult(operations: any) {
+  async getOperationResult(operations: any, req: express.Request) {
     let result = {}
     const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(this.appBase))
       .filter(v => Object.getPrototypeOf(this.appBase)[v] instanceof OperationFunction)
     for (const key of Object.getOwnPropertyNames(operations)) {
       if (keys.indexOf(key) !== -1) {
-        const operated = await Object.getPrototypeOf(this.appBase)[key].operation(
+        const operated = await Object.getPrototypeOf(this.appBase)[key].operation.apply({req}, [
           operations[key]
-        )
+        ])
         result = Object.assign(result,
           {
             [key]: {
@@ -66,7 +66,7 @@ export class Server {
     }
     this.app['ws']('/ws', (ws: ws, req: express.Request) => {
       ws.on('message', message => {
-        this.getOperationResult(JSON.parse(message)['operations'])
+        this.getOperationResult(JSON.parse(message)['operations'], req)
           .then((result: {}) => {
             return Object.keys(result).forEach(key => 
               result[key][Symbol.for("broadcast")] ? broadcast(JSON.stringify(result)) : ws.send(JSON.stringify(result)))

@@ -3,10 +3,10 @@ import * as http from "http"
 import { Server } from "../src/index"
 import "isomorphic-fetch"
 import { assert } from "chai"
-import { op, broadcast, request } from "xhip"
+import { op, broadcast, Application } from "xhip"
 import * as WebSocket from "ws"
 
-class TestBaseApp {
+class TestBaseApp extends Application {
   @op showAppName() {
     return {
       "appName": "Xhip"
@@ -19,7 +19,6 @@ class TestBaseApp {
     return Promise.resolve({ supportAsync: "yes" })
   }
   @op ping() {
-    (request as any)()
     return {
       "ping": "pong"
     }
@@ -28,6 +27,11 @@ class TestBaseApp {
   @op broadcaster() {
     return {
       "ping": "pong"
+    }
+  }
+  @op ip() {
+    return {
+      ip: this.req.ip
     }
   }
 }
@@ -112,6 +116,27 @@ describe('Server', () => {
       return res.json().then(x => assert.deepEqual(x, {
         echo: {
           say: "hello"
+        }
+      }))
+    })
+  })
+  it('can replace req object as actual one', () => {
+    return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        '__xhip': true,
+        operations: {
+          ip: null,
+        }
+      })
+    }).then((res) => {
+      assert.strictEqual(res.status, 200)
+      return res.json().then(x => assert.deepEqual(x, {
+        ip: {
+          ip: "::ffff:127.0.0.1"
         }
       }))
     })
