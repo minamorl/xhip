@@ -87,6 +87,36 @@ generate server/client compatible function. From client side, it will become to
 argument generator which will be posted into server.
 
 
+## Server Specification
+
+### Normal POST Connection
+
+Xhip do everything in POST method.
+
+You can inquiry this way:
+```
+{
+  "__xhip": true,
+  "operations": {
+    "your_operation": argument
+  }
+}
+```
+then server must return this way:
+```
+{
+  "your_operation": result  
+}
+```
+
+Those argument and result can be any.
+
+
+### WebSocket
+
+Most is same but no need to append "__xhip" mark.
+
+
 ## Limitation
 - Any operation must returns JSON object which can be combined with other operations.
 - Not as usual importation, we have to use `Xhip.load` for support isomorphism inside app.
