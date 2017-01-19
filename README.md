@@ -14,10 +14,10 @@ You can see React example in [xhip-example](https://github.com/minamorl/xhip-exa
 App(app.js):
 
 ```js
-import { op, load } from "xhip"
+import { op, load, Application } from "xhip"
 const request = load("request")
 
-export class App {
+export class App extends Application {
   @op showAppName() {
     return {
       appName: "xhip example"

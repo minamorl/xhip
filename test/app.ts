@@ -1,6 +1,6 @@
-import { op, broadcast, request } from "../src/index"
+import { op, broadcast, Application } from "../src/index"
 
-export class TestBaseApp {
+export class TestBaseApp extends Application {
   @op showAppName() {
     return {
       "appName": "Xhip"
