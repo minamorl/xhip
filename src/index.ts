@@ -1,7 +1,5 @@
 import * as root from "window-or-global"
 import * as express from "express"
-export type OperationFunctions = {[key: string]: OperationFunction}
-export const operationFunctionSymbol = Symbol.for('OperationFunction')
 export class OperationFunction extends Function {
   constructor(
     public operation: (args: any) => Promise<any> | any,
@@ -28,15 +26,14 @@ export const broadcast = (target: any, propertyKey: string, descriptor: Property
 export const op = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
   if (!descriptor.value)
     throw new TypeError("broadcast decorator should apply to method")
-  // Update descriptor with wrapper class
-  if (!target[operationFunctionSymbol])
-    target[operationFunctionSymbol] = {}
-  descriptor.value = target[operationFunctionSymbol][propertyKey] = new OperationFunction(descriptor.value, propertyKey)
+  descriptor.value = new OperationFunction(descriptor.value, propertyKey)
   // Add static function accessing across client side
   return descriptor
 }
 
-export const request = mock() as any as express.Request
+export class Application {
+  req: express.Request
+}
 
 export function mock() {
   let x: any =  new Proxy((() => {
