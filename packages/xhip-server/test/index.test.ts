@@ -3,8 +3,7 @@ import * as http from "http"
 import { Server } from "../src/index"
 import "isomorphic-fetch"
 import { assert } from "chai"
-import { op } from "xhip"
-import * as request from "request"
+import { op, broadcast, request } from "xhip"
 import * as WebSocket from "ws"
 
 class TestBaseApp {
@@ -20,6 +19,13 @@ class TestBaseApp {
     return Promise.resolve({ supportAsync: "yes" })
   }
   @op ping() {
+    (request as any)()
+    return {
+      "ping": "pong"
+    }
+  }
+  @broadcast
+  @op broadcaster() {
     return {
       "ping": "pong"
     }
@@ -110,12 +116,11 @@ describe('Server', () => {
       }))
     })
   })
-  it('can handle WebSocket request', (done) => {
+  it('can open socket', (done) => {
     socket.on('open', () => {
       done()
     })
   })
-
   it('can handle WebSocket request', (done) => {
     socket.on('open', () => {
       socket.send(JSON.stringify({
@@ -128,6 +133,33 @@ describe('Server', () => {
     socket.on('message', msg => {
       assert.deepEqual(JSON.parse(msg), { echo: { say: "hello" }})
       done()
+    })
+  })
+  it('can handle broadcast operation', (done) => {
+    
+    const ws2 = new WebSocket(`ws://127.0.0.1:${app.server.address().port}/ws`, {
+      headers: {
+        "Sec-WebSocket-Accept": "2",
+      }
+    })
+    ws2.on('message', msg => {
+      assert.deepEqual(JSON.parse(msg), { broadcaster: { ping: "pong" }})
+      done()
+    })
+    
+    ws2.on('open', () => {
+      const ws1 = new WebSocket(`ws://127.0.0.1:${app.server.address().port}/ws`, {
+        headers: {
+          "Sec-WebSocket-Accept": "1",
+        }
+      })
+      ws1.on('open', () => {
+        ws1.send(JSON.stringify({
+          operations: {
+            broadcaster: "",
+          }
+        }))
+      })
     })
   })
 })

@@ -4,7 +4,7 @@ import * as http from "http"
 import * as cors from "cors"
 import * as ws from "ws"
 
-import {OperationFunctions, operationFunctionSymbol} from "xhip"
+import {OperationFunction} from "xhip"
 
 export interface ServerOptions {
   cors?: cors.CorsOptions
@@ -20,11 +20,10 @@ export class Server {
 
     app.post('/', async (req, res) => {
       if (req.body['__xhip']) {
-        let result = {}
         if (!req.body['operations']) {
           return res.sendStatus(200)
         }
-        result = await this.getOperationResult(req.body['operations'])
+        const result = await this.getOperationResult(req.body['operations'])
         res.json(result)
       } else {
         return res.sendStatus(400)
@@ -34,17 +33,20 @@ export class Server {
   }
   async getOperationResult(operations: any) {
     let result = {}
-    const availableOperations = Object.getPrototypeOf(this.appBase)[operationFunctionSymbol] as OperationFunctions
-    const keys: Array<string> = Object.keys(availableOperations).map(
-      x => availableOperations[x].key)
-
+    const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(this.appBase))
+      .filter(v => Object.getPrototypeOf(this.appBase)[v] instanceof OperationFunction)
     for (const key of Object.getOwnPropertyNames(operations)) {
       if (keys.indexOf(key) !== -1) {
-        const operated = await Object.getPrototypeOf(this.appBase)[operationFunctionSymbol][key].operation(
+        const operated = await Object.getPrototypeOf(this.appBase)[key].operation(
           operations[key]
         )
         result = Object.assign(result,
-          { [key]: operated }
+          {
+            [key]: {
+              ...operated,
+              [Symbol.for("broadcast")]: Object.getPrototypeOf(this.appBase)[key][Symbol.for("broadcast")]
+            }
+          }
         )
       }
     }
@@ -53,10 +55,22 @@ export class Server {
   listen(...args: any[]): http.Server {
     this.server = http.createServer(this.app)
     const expressWs = require('express-ws')(this.app, this.server)
+    const broadcast = (message: string): void => {
+      expressWs.getWss().clients.forEach((client: any) => {
+        try {
+          client.send(message)
+        } catch(e) {
+          // nothing to do
+        }
+      })
+    }
     this.app['ws']('/ws', (ws: ws, req: express.Request) => {
       ws.on('message', message => {
         this.getOperationResult(JSON.parse(message)['operations'])
-          .then((result: any) => ws.send(JSON.stringify(result)))
+          .then((result: {}) => {
+            return Object.keys(result).forEach(key => 
+              result[key][Symbol.for("broadcast")] ? broadcast(JSON.stringify(result)) : ws.send(JSON.stringify(result)))
+          }).catch()
       })
     })
     return (this.server.listen as any)(...args) as http.Server
