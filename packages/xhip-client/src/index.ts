@@ -1,5 +1,7 @@
 import "whatwg-fetch"
 
+const createResponse = (parsed: any) => Object.assign({}, ...Object.keys(parsed).map(k => parsed[k]))
+
 export class Client {
   socket: WebSocket
   subscriptions: any[] = []
@@ -13,7 +15,7 @@ export class Client {
         const { target } = x
         const { receiver } = x
         if (target.some((y: any) => allExecutedOperations.indexOf(y.key) !== -1)) {
-          receiver(Object.assign({}, ...Object.keys(parsed).map(k => parsed[k])))
+          receiver(createResponse(parsed))
         }
       }
     }
@@ -34,7 +36,7 @@ export class Client {
     }).then(res => {
       if (res.status >= 400) return Promise.reject(res)
       return res.json()
-    })
+    }).then(createResponse)
   }
   get isSocketOpen() {
     return this.socket.readyState === WebSocket.OPEN
