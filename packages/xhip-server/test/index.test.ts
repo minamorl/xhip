@@ -80,8 +80,12 @@ describe('Server', () => {
     }).then((res) => {
       assert.strictEqual(res.status, 200)
       return res.json().then(x => assert.deepEqual(x, {
-        appName: "Xhip",
-        say: 'hi'
+        showAppName: {
+          appName: "Xhip"
+        }, 
+        echo: {
+          say: 'hi'
+        }
       }))
     })
   })
@@ -100,7 +104,9 @@ describe('Server', () => {
     }).then((res) => {
       assert.strictEqual(res.status, 200)
       return res.json().then(x => assert.deepEqual(x, {
-        say: "hello",
+        echo: {
+          say: "hello"
+        }
       }))
     })
   })
