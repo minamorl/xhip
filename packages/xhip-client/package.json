@@ -16,10 +16,12 @@
   "devDependencies": {
     "@types/chai": "^3.4.34",
     "@types/express": "^4.0.34",
+    "@types/fetch-mock": "^5.8.0",
     "@types/mocha": "^2.2.36",
     "@types/sinon": "^1.16.34",
     "chai": "^3.5.0",
     "express": "^4.14.0",
+    "fetch-mock": "^5.8.1",
     "mocha": "^3.2.0",
     "sinon": "^1.17.7",
     "typescript": "^2.1.4",
