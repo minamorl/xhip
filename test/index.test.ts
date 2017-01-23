@@ -76,6 +76,10 @@ describe('mock', () => {
       sample.sample.sample.sample.sample.sample.sample.sample("test")
     )
   })
+  it('should be newable', () => {
+    const obj = new sample()
+    assert.doesNotThrow(() => obj.a.b.c.d.e)
+  })
 })
 describe('broadcast', () => {
   it('should append @@broadcast property', () => {
