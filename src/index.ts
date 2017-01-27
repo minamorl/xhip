@@ -25,7 +25,7 @@ export const broadcast = (target: any, propertyKey: string, descriptor: Property
 
 export const op = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
   if (!descriptor.value)
-    throw new TypeError("broadcast decorator should apply to method")
+    throw new TypeError("op decorator should apply to method")
   descriptor.value = new OperationFunction(descriptor.value, propertyKey)
   // Add static function accessing across client side
   return descriptor
