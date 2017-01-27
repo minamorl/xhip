@@ -84,7 +84,7 @@ describe('Server', () => {
         '__xhip': true,
         operations: {
           showAppName: null,
-          echo: "hi",
+          echo: ["hi"],
         }
       })
     }).then((res) => {
@@ -108,7 +108,7 @@ describe('Server', () => {
       body: JSON.stringify({
         '__xhip': true,
         operations: {
-          echo: "hello",
+          echo: ["hello"],
         }
       })
     }).then((res) => {
@@ -150,7 +150,7 @@ describe('Server', () => {
     socket.on('open', () => {
       socket.send(JSON.stringify({
         operations: {
-          echo: "hello",
+          echo: ["hello"],
         }
       }))
     })
@@ -181,7 +181,7 @@ describe('Server', () => {
       ws1.on('open', () => {
         ws1.send(JSON.stringify({
           operations: {
-            broadcaster: "",
+            broadcaster: [""],
           }
         }))
       })

@@ -37,9 +37,8 @@ export class Server {
       .filter(v => Object.getPrototypeOf(this.appBase)[v] instanceof OperationFunction)
     for (const key of Object.getOwnPropertyNames(operations)) {
       if (keys.indexOf(key) !== -1) {
-        const operated = await Object.getPrototypeOf(this.appBase)[key].operation.apply({req}, [
-          operations[key]
-        ])
+        const args = operations[key] ? [...operations[key]] : [null]
+        const operated = await Object.getPrototypeOf(this.appBase)[key].operation.apply({req}, args)
         result = Object.assign(result,
           {
             [key]: {
