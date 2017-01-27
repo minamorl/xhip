@@ -26,14 +26,21 @@ describe('OperationFunction', () => {
     const original = function(arg: any) {}
     const operation = new OperationFunction(original, "key")
     assert.deepEqual(operation("value"), {
-      "key": "value"
+      "key": ["value"]
     })
   })
   it('accepts empty argument and transform undefined to null when instance is called', () => {
     const original = function(arg: any) {}
     const operation = new OperationFunction(original, "key")
     assert.deepEqual(operation(), {
-      "key": null
+      "key": []
+    })
+  })
+  it('accepts multiple arguments and transform into correct other function', () => {
+    const original = function(arg1: string, arg2: number) {}
+    const operation = new OperationFunction(original, "key")
+    assert.deepEqual(operation(), {
+      "key": []
     })
   })
 })

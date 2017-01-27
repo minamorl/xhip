@@ -2,13 +2,13 @@ import * as root from "window-or-global"
 import * as express from "express"
 export class OperationFunction extends Function {
   constructor(
-    public operation: (args: any) => Promise<any> | any,
+    public operation: (...args: any[]) => Promise<any> | any,
     public key: string
   ) {
     super()
-    let fn = function(arg?: any) {
+    let fn = function(...argv: any[]) {
       let result = {}
-      result[key] = arg ? arg : null
+      result[key] = argv
       return result
     }
     Object.setPrototypeOf(fn, this)
