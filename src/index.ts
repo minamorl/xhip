@@ -12,9 +12,10 @@ export class OperationFunction extends Function {
     public application?: any,
   ) {
     super()
+    const context = application ? application.constructor.name : "undefined"
     let fn = function(...argv: any[]): OperationFunctionResult {
-      let result = {
-        context: typeof application,
+      const result = {
+        context,
         operation: key,
         args: argv,
       }
@@ -24,7 +25,6 @@ export class OperationFunction extends Function {
     return fn as any as OperationFunction
   }
 }
-
 export const broadcast = (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) => {
   if (!descriptor || !descriptor.value || !propertyKey)
     throw new TypeError("broadcast decorator should apply to method")
@@ -35,6 +35,8 @@ export const broadcast = (target: any, propertyKey?: string, descriptor?: Proper
 export const op = (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) => {
   if (!descriptor || !descriptor.value || !propertyKey)
     throw new TypeError("op decorator should apply to method")
+  console.log(target)
+  console.log(Object.prototype.toString.apply(target))
   descriptor.value = new OperationFunction(descriptor.value, propertyKey, target)
   // Add static function accessing across client side
   return descriptor

@@ -48,6 +48,13 @@ describe('OperationFunction', () => {
       "args": []
     })
   })
+  it('will pass current class as context', () => {
+    assert.deepEqual(app.getId(), {
+      "operation": "getId",
+      "context": "TestBaseApp",
+      "args": []
+    })
+  })
 })
 describe('load', () => {
   it('should be strongly typed as original', () => {
