@@ -31,24 +31,39 @@ export class Server {
     })
     this.app = app
   }
+  get appBaseProto() {
+    return Object.getPrototypeOf(this.appBase)
+  }
+  lookupOperationFunction(context: string, operation: string, currentBase=this.appBase): OperationFunction | null {
+    const currentBaseProto = Object.getPrototypeOf(currentBase)
+    if(currentBaseProto.constructor.name === context)
+      return currentBaseProto[operation]
+    const names = Object.getOwnPropertyNames(currentBase)
+    if (names.length === 1 && names.indexOf('constructor') !== -1)
+      return null
+    const protoName = names.filter(x => 
+      Object.getPrototypeOf(currentBase[x]).constructor && Object.getPrototypeOf(currentBase[x]).constructor.name === context)[0]
+    if (protoName)
+      return this.lookupOperationFunction(context, operation, currentBase[protoName])
+    return names.map(name => this.lookupOperationFunction(context, operation, currentBase[name]))[0] || null
+  }
   async getOperationResult(operations: any[], req: express.Request) {
     let result = {}
-    const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(this.appBase))
-      .filter(v => Object.getPrototypeOf(this.appBase)[v] instanceof OperationFunction)
     operations.forEach(async op => {
       const {operation} = op
       const {args} = op
-      if (keys.indexOf(operation) !== -1) {
-        const operated = await Object.getPrototypeOf(this.appBase)[operation].operation.apply({req}, args)
-        result = Object.assign(result,
-          {
-            [operation]: {
-              ...operated,
-              [Symbol.for("broadcast")]: Object.getPrototypeOf(this.appBase)[operation][Symbol.for("broadcast")]
-            }
+      const {context} = op
+      const operationFunction = this.lookupOperationFunction(context, operation)
+      if (!operationFunction) return
+      const operated = await operationFunction.operation.apply({req}, args)
+      result = Object.assign(result,
+        {
+          [operation]: {
+            ...operated,
+            [Symbol.for("broadcast")]: operationFunction[Symbol.for("broadcast")]
           }
-        )
-      }
+        }
+      )
     })
     return result
   }

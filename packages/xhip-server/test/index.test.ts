@@ -6,7 +6,25 @@ import { assert } from "chai"
 import { op, broadcast, Application } from "xhip"
 import * as WebSocket from "ws"
 
+class TestMixinMixin extends Application {
+  @op echo() {
+    return {
+      'this': 'is from TestMixinMixin'
+    }
+  }
+}
+
+class TestMixin extends Application {
+  testMixinMixin = new TestMixinMixin
+  @op echo() {
+    return {
+      'this': 'is from TestMixin'
+    }
+  }
+}
+
 class TestBaseApp extends Application {
+  testMixin = new TestMixin()
   @op showAppName() {
     return {
       "appName": "Xhip"
@@ -119,6 +137,18 @@ describe('Server', () => {
         }
       }))
     })
+  })
+  it('can search mixins', () => {
+    const fn = app.lookupOperationFunction('TestMixin', 'echo')
+    assert.isFunction(fn!)
+  })
+  it('can search chained mixins', () => {
+    const fn = app.lookupOperationFunction('TestMixinMixin', 'echo')
+    assert.isFunction(fn!)
+  })
+  it('returns null when mixins are not there', () => {
+    const fn = app.lookupOperationFunction('TestMixinMixinFakeMixin', 'echo')
+    assert.isNull(fn!)
   })
   it('can open socket', (done) => {
     socket.on('open', () => {
