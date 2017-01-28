@@ -6,8 +6,7 @@ import { assert } from "chai"
 import * as _chai from "chai"
 describe('op', () => {
   it('should replace original function', () => {
-    assert.equal(app.echo instanceof OperationFunction, true)
-    assert.equal(app.showAppName instanceof OperationFunction, true)
+    assert.equal(app.getId instanceof OperationFunction, true)
   })
 })
 describe('OperationFunction', () => {
@@ -26,21 +25,27 @@ describe('OperationFunction', () => {
     const original = function(arg: any) {}
     const operation = new OperationFunction(original, "key")
     assert.deepEqual(operation("value"), {
-      "key": ["value"]
+      "operation": "key",
+      "context": "undefined",
+      "args": ["value"]
     })
   })
   it('accepts empty argument and transform undefined to null when instance is called', () => {
     const original = function(arg: any) {}
     const operation = new OperationFunction(original, "key")
     assert.deepEqual(operation(), {
-      "key": []
+      "operation": "key",
+      "context": "undefined",
+      "args": []
     })
   })
   it('accepts multiple arguments and transform into correct other function', () => {
     const original = function(arg1: string, arg2: number) {}
     const operation = new OperationFunction(original, "key")
     assert.deepEqual(operation(), {
-      "key": []
+      "operation": "key",
+      "context": "undefined",
+      "args": []
     })
   })
 })
@@ -90,6 +95,6 @@ describe('mock', () => {
 })
 describe('broadcast', () => {
   it('should append @@broadcast property', () => {
-    assert.isTrue(app.cast[Symbol.for('broadcast')])
+    assert.isTrue(app.getId[Symbol.for('broadcast')])
   })
 })

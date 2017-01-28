@@ -1,14 +1,23 @@
 import * as root from "window-or-global"
 import * as express from "express"
+export interface OperationFunctionResult {
+  context: string
+  operation: string,
+  args: any[]
+}
 export class OperationFunction extends Function {
   constructor(
     public operation: (...args: any[]) => Promise<any> | any,
-    public key: string
+    public key: string,
+    public application?: any,
   ) {
     super()
-    let fn = function(...argv: any[]) {
-      let result = {}
-      result[key] = argv
+    let fn = function(...argv: any[]): OperationFunctionResult {
+      let result = {
+        context: typeof application,
+        operation: key,
+        args: argv,
+      }
       return result
     }
     Object.setPrototypeOf(fn, this)
@@ -16,17 +25,17 @@ export class OperationFunction extends Function {
   }
 }
 
-export const broadcast = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-  if (!descriptor.value)
+export const broadcast = (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) => {
+  if (!descriptor || !descriptor.value || !propertyKey)
     throw new TypeError("broadcast decorator should apply to method")
   descriptor.value[Symbol.for("broadcast")] = true
   return descriptor
 }
 
-export const op = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-  if (!descriptor.value)
+export const op = (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) => {
+  if (!descriptor || !descriptor.value || !propertyKey)
     throw new TypeError("op decorator should apply to method")
-  descriptor.value = new OperationFunction(descriptor.value, propertyKey)
+  descriptor.value = new OperationFunction(descriptor.value, propertyKey, target)
   // Add static function accessing across client side
   return descriptor
 }
