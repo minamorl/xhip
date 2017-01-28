@@ -16,7 +16,7 @@ export class Server {
   constructor(public appBase: any, public options?: ServerOptions) {
     const app = express()
     app.use(cors(options!.cors!))
-    app.use(bodyParser.json());
+    app.use(bodyParser.json({limit: '50mb'}));
 
     app.post('/', async (req, res) => {
       if (req.body['__xhip']) {
@@ -31,24 +31,25 @@ export class Server {
     })
     this.app = app
   }
-  async getOperationResult(operations: any, req: express.Request) {
+  async getOperationResult(operations: any[], req: express.Request) {
     let result = {}
     const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(this.appBase))
       .filter(v => Object.getPrototypeOf(this.appBase)[v] instanceof OperationFunction)
-    for (const key of Object.getOwnPropertyNames(operations)) {
-      if (keys.indexOf(key) !== -1) {
-        const args = operations[key] ? [...operations[key]] : [null]
-        const operated = await Object.getPrototypeOf(this.appBase)[key].operation.apply({req}, args)
+    operations.forEach(async op => {
+      const {operation} = op
+      const {args} = op
+      if (keys.indexOf(operation) !== -1) {
+        const operated = await Object.getPrototypeOf(this.appBase)[operation].operation.apply({req}, args)
         result = Object.assign(result,
           {
-            [key]: {
+            [operation]: {
               ...operated,
-              [Symbol.for("broadcast")]: Object.getPrototypeOf(this.appBase)[key][Symbol.for("broadcast")]
+              [Symbol.for("broadcast")]: Object.getPrototypeOf(this.appBase)[operation][Symbol.for("broadcast")]
             }
           }
         )
       }
-    }
+    })
     return result
   }
   listen(...args: any[]): http.Server {

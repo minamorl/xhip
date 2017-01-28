@@ -82,10 +82,10 @@ describe('Server', () => {
       method: 'POST',
       body: JSON.stringify({
         '__xhip': true,
-        operations: {
-          showAppName: null,
-          echo: ["hi"],
-        }
+        operations: [
+          testBaseApp.showAppName(),
+          testBaseApp.echo('hi')
+        ]
       })
     }).then((res) => {
       assert.strictEqual(res.status, 200)
@@ -99,27 +99,6 @@ describe('Server', () => {
       }))
     })
   })
-  it('can handle async function', () => {
-    return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      method: 'POST',
-      body: JSON.stringify({
-        '__xhip': true,
-        operations: {
-          echo: ["hello"],
-        }
-      })
-    }).then((res) => {
-      assert.strictEqual(res.status, 200)
-      return res.json().then(x => assert.deepEqual(x, {
-        echo: {
-          say: "hello"
-        }
-      }))
-    })
-  })
   it('can replace req object as actual one', () => {
     return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
       headers: {
@@ -128,9 +107,9 @@ describe('Server', () => {
       method: 'POST',
       body: JSON.stringify({
         '__xhip': true,
-        operations: {
-          ip: null,
-        }
+        'operations': [
+          testBaseApp.ip()
+        ]
       })
     }).then((res) => {
       assert.strictEqual(res.status, 200)
@@ -149,9 +128,9 @@ describe('Server', () => {
   it('can handle WebSocket request', (done) => {
     socket.on('open', () => {
       socket.send(JSON.stringify({
-        operations: {
-          echo: ["hello"],
-        }
+        operations: [
+          testBaseApp.echo('hello')
+        ]
       }))
     })
 
@@ -180,9 +159,9 @@ describe('Server', () => {
       })
       ws1.on('open', () => {
         ws1.send(JSON.stringify({
-          operations: {
-            broadcaster: [""],
-          }
+          operations: [
+            testBaseApp.broadcaster()
+          ]
         }))
       })
     })
