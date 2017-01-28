@@ -23,7 +23,7 @@ export class Client {
   exec = (ops: Array<any>) => {
     const body = JSON.stringify({
       '__xhip': true,
-      'operations': Object.assign({}, ...ops)
+      'operations': ops
     })
     return fetch(this.uri, {
       headers: {
@@ -50,7 +50,7 @@ export class Client {
   send(ops: Array<any>): void {
     if(this.isSocketOpen) {
       this.socket.send(JSON.stringify({
-        'operations': Object.assign({}, ...ops)
+        'operations': ops
       }))
     }
   }
