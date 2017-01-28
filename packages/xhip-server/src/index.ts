@@ -49,12 +49,12 @@ export class Server {
   }
   async getOperationResult(operations: any[], req: express.Request) {
     let result = {}
-    operations.forEach(async op => {
+    for (let op of operations) {
       const {operation} = op
       const {args} = op
       const {context} = op
       const operationFunction = this.lookupOperationFunction(context, operation)
-      if (!operationFunction) return
+     if (!operationFunction) return
       const operated = await operationFunction.operation.apply({req}, args)
       result = Object.assign(result,
         {
@@ -64,7 +64,7 @@ export class Server {
           }
         }
       )
-    })
+    }
     return result
   }
   listen(...args: any[]): http.Server {
