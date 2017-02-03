@@ -17,8 +17,10 @@ export class Server {
     const app = express()
     app.use(cors(options!.cors!))
     app.use(bodyParser.json({limit: '50mb'}));
-
-    app.post('/', async (req, res) => {
+    this.app = app
+  }
+  mount(appBase: any) {
+    this.app.post('/', async (req, res) => {
       if (req.body['__xhip']) {
         if (!req.body['operations']) {
           return res.sendStatus(200)
@@ -29,7 +31,6 @@ export class Server {
         return res.sendStatus(400)
       }
     })
-    this.app = app
   }
   get appBaseProto() {
     return Object.getPrototypeOf(this.appBase)
@@ -79,6 +80,7 @@ export class Server {
         }
       })
     }
+    this.mount(this.appBase)
     this.app['ws']('/ws', (ws: ws, req: express.Request) => {
       ws.on('message', message => {
         this.getOperationResult(JSON.parse(message)['operations'], req)
