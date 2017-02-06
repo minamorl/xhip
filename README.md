@@ -3,13 +3,25 @@
 [![CircleCI](https://circleci.com/gh/minamorl/xhip.svg?style=svg)](https://circleci.com/gh/minamorl/xhip) [![npm version](https://badge.fury.io/js/xhip.svg)](https://badge.fury.io/js/xhip)
 
 
-## About
+**Xhip** is a modern, isomorphic, operation-based web API framework built top on express.
 
-**Xhip** is a modern, isomorphic, operation-based web framework built top on express. For drawing the usage of this, see the codes below.
+## Concept
+
+TL;DR: See [slides](http://slides.com/minamorl/api-design-for-isomorphic-age).
+
+Core concept is do everything with only one-single-endpoint. Benefit is doing same things with less requests. In xhip, all function will become into one-single-endpoint. They are callable from frontend and become single-endpoint API. Also, Xhip integrates heavily with WebSocket. All operation will be callable from both of normal POST request and WebSocket request.
+
+And also, we heavily focus on integration with TypeScript.
+
+You can see full React example in [xhip-example](https://github.com/minamorl/xhip-example).
+
+## Install
+
+```
+npm install xhip xhip-server xhip-client
+```
 
 ## Example
-
-You can see React example in [xhip-example](https://github.com/minamorl/xhip-example).
 
 App(app.js):
 
@@ -52,8 +64,10 @@ import { Server } from "xhip-server"
 import { app } from "./app.js"
 
 new xhip.Server(app, {
-  origin: 'http://localhost:21000', // for CORS support
-  credentials: true,
+  cors: {
+    origin: 'http://localhost:21000', // for CORS support
+    credentials: true,
+  }
 }).app.listen(8080)
 ```
 
@@ -82,9 +96,13 @@ client.exec([
 ```
 
 ## How it works
-All operations are transformed into one endpoint. Decorator `op` automatically
-generate server/client compatible function. From client side, it will become to
-argument generator which will be posted into server.
+
+When you see those codes you will notice there is wired `load` function. This is a function for isomorphic require.
+From server side, it will become normal `require` function, defined by commonjs. And from frontend, it will become useless proxy object.
+So that both can require same application code.
+
+Also, there is a decorator object, named `op`. Decorator `op` automatically generate server/client compatible function. From server side, it will become endpoint definition.
+From client side, it will become to argument generator which will be posted into server.
 
 
 ## Server Specification
