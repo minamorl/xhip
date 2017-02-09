@@ -1,32 +1,9 @@
 {
-  "name": "xhip",
-  "description": "API server framework for isomorphic age",
-  "main": "./lib/src/index.js",
-  "types": "./lib/src/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "test": "npm run build && mocha ./lib/test/**/*.js",
-    "prepublish": "npm run build"
+    "pretest": "lerna exec -- npm install",
+    "test": "lerna run test"
   },
-  "author": "minamorl",
-  "license": "MIT",
-  "files": [
-    "lib/src/"
-  ],
   "devDependencies": {
-    "@types/body-parser": "0.0.33",
-    "@types/chai": "^3.4.34",
-    "@types/mocha": "^2.2.36",
-    "@types/sinon": "^1.16.34",
-    "chai": "^3.5.0",
-    "mocha": "^3.2.0",
-    "sinon": "^1.17.7",
-    "typescript": "^2.1.4"
-  },
-  "dependencies": {
-    "@types/express": "^4.0.34",
-    "@types/window-or-global": "^1.0.0",
-    "window-or-global": "^1.0.1"
-  },
-  "version": "0.1.0"
+    "lerna": "2.0.0-beta.37"
+  }
 }
