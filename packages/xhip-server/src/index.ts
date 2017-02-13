@@ -57,7 +57,8 @@ export class Server {
       const operationFunction = this.lookupOperationFunction(context, operation)
       if (!operationFunction) return
       const operated = await operationFunction.operation.apply({req}, args)
-      result = Object.assign(result,
+      result[context] = result[context] || {}
+      Object.assign(result[context],
         {
           [operation]: {
             ...operated,
@@ -85,8 +86,10 @@ export class Server {
       ws.on('message', message => {
         this.getOperationResult(JSON.parse(message)['operations'], req)
           .then((result: {}) => {
-            return Object.keys(result).forEach(key => 
-              result[key][Symbol.for("broadcast")] ? broadcast(JSON.stringify(result)) : ws.send(JSON.stringify(result)))
+            return Object.keys(result).forEach(namespace => 
+              Object.keys(result[namespace]).forEach(operation => 
+                result[namespace][operation][Symbol.for("broadcast")]
+                  ? broadcast(JSON.stringify(result)) : ws.send(JSON.stringify(result))))
           }).catch()
       })
     })

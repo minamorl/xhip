@@ -72,7 +72,7 @@ describe('Server', () => {
     const server = express()
     server.use(new Server(testBaseApp, {}).app)
   })
-  it('returns 400 when received without __ship signature', () => {
+  it('returns 400 when received without __xhip signature', () => {
     return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
       method: 'POST'
     }).then((res) => {
@@ -102,17 +102,25 @@ describe('Server', () => {
         '__xhip': true,
         operations: [
           testBaseApp.showAppName(),
-          testBaseApp.echo('hi')
+          testBaseApp.echo('hi'),
+          testBaseApp.testMixin.echo()
         ]
       })
     }).then((res) => {
       assert.strictEqual(res.status, 200)
       return res.json().then(x => assert.deepEqual(x, {
-        showAppName: {
-          appName: "Xhip"
-        }, 
-        echo: {
-          say: 'hi'
+        "TestBaseApp": {
+          showAppName: {
+            appName: "Xhip"
+          }, 
+          echo: {
+            say: 'hi'
+          }
+        },
+        "TestMixin": {
+          echo: {
+            'this': 'is from TestMixin'
+          }
         }
       }))
     })
@@ -132,8 +140,10 @@ describe('Server', () => {
     }).then((res) => {
       assert.strictEqual(res.status, 200)
       return res.json().then(x => assert.deepEqual(x, {
-        ip: {
-          ip: "::ffff:127.0.0.1"
+        "TestBaseApp": {
+          ip: {
+            ip: "::ffff:127.0.0.1"
+          }
         }
       }))
     })
@@ -165,7 +175,11 @@ describe('Server', () => {
     })
 
     socket.on('message', msg => {
-      assert.deepEqual(JSON.parse(msg), { echo: { say: "hello" }})
+      assert.deepEqual(JSON.parse(msg), {
+        TestBaseApp: {
+          echo: { say: "hello" }
+        }
+      })
       done()
     })
   })
@@ -177,7 +191,11 @@ describe('Server', () => {
       }
     })
     ws2.on('message', msg => {
-      assert.deepEqual(JSON.parse(msg), { broadcaster: { ping: "pong" }})
+      assert.deepEqual(JSON.parse(msg), {
+        TestBaseApp: {
+          broadcaster: { ping: "pong" }
+        }
+      })
       done()
     })
     
