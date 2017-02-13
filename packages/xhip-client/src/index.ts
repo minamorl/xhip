@@ -2,8 +2,6 @@ import "whatwg-fetch"
 
 const ReconnectingWebSocket = require('reconnecting-websocket')
 
-const createResponse = (parsed: any) => Object.assign({}, ...Object.keys(parsed).map(k => parsed[k]))
-
 export class Client {
   socket: WebSocket
   subscriptions: any[] = []
@@ -25,7 +23,7 @@ export class Client {
     }).then(res => {
       if (res.status >= 400) return Promise.reject(res)
       return res.json()
-    }).then(createResponse)
+    })
   }
   get isSocketOpen() {
     return this.socket.readyState === WebSocket.OPEN
@@ -53,7 +51,7 @@ export class Client {
         const { target } = x
         const { receiver } = x
         if (target.some((y: any) => allExecutedOperations.indexOf(y.key) !== -1)) {
-          receiver(createResponse(parsed))
+          receiver(parsed)
         }
       }
     }
