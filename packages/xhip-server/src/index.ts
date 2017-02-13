@@ -55,7 +55,7 @@ export class Server {
       const {args} = op
       const {context} = op
       const operationFunction = this.lookupOperationFunction(context, operation)
-     if (!operationFunction) return
+      if (!operationFunction) return
       const operated = await operationFunction.operation.apply({req}, args)
       result = Object.assign(result,
         {
