@@ -1,10 +1,11 @@
 import "whatwg-fetch"
+import {OperationFunction} from "xhip"
 
 const ReconnectingWebSocket = require('reconnecting-websocket')
 
 export class Client {
   socket: WebSocket
-  subscriptions: any[] = []
+  subscriptions: {key: string, receiver: (value: any) => void}[] = []
   constructor(public uri: string, public opts: { ssl: boolean }) {
   }
   exec<T1>(ops: [Promise<T1>]): Promise<[T1]>
@@ -35,7 +36,7 @@ export class Client {
   }
   subscribe<T>(target: (...args: any[]) => Promise<T>, receiver: (value: T) => void) {
     this.subscriptions.push({
-      target,
+      key: (target as any as OperationFunction).key,
       receiver
     })
   }
@@ -57,10 +58,9 @@ export class Client {
       const parsed = JSON.parse(ev.data)
       const allExecutedOperations = Object.keys(parsed)
       for (let x of this.subscriptions) {
-        const { target } = x
-        const { receiver } = x
-        if (target.some((y: any) => allExecutedOperations.indexOf(y.key) !== -1)) {
-          receiver(parsed)
+        const {key, receiver} = x
+        if (parsed.hasOwnProperty(key)) {
+          receiver(parsed[key])
         }
       }
     }
