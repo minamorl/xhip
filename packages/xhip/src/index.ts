@@ -25,6 +25,9 @@ export class OperationFunction extends Function {
     return fn as any as OperationFunction
   }
 }
+export interface OperationFunction {
+  (...args: any[]): OperationFunctionResult
+}
 export const broadcast = (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) => {
   if (!descriptor || !descriptor.value || !propertyKey)
     throw new TypeError("broadcast decorator should apply to method")
