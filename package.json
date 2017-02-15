@@ -4,6 +4,7 @@
     "test": "lerna run test"
   },
   "devDependencies": {
-    "lerna": "2.0.0-beta.37"
+    "lerna": "2.0.0-beta.37",
+    "typescript": "^2.1.6"
   }
 }
