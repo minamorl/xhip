@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "pretest": "lerna exec -- npm install",
+    "pretest": "lerna bootstrap",
     "test": "lerna run test"
   },
   "devDependencies": {
