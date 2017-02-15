@@ -6,6 +6,8 @@ import * as ws from "ws"
 
 import {OperationFunction} from "xhip"
 
+const broadcastSymbol = Symbol()
+
 export interface ServerOptions {
   cors?: cors.CorsOptions
   server?: http.Server
@@ -49,24 +51,23 @@ export class Server {
     return names.map(name => this.lookupOperationFunction(context, operation, currentBase[name]))[0] || null
   }
   async getOperationResult(operations: any[], req: express.Request) {
-    let result = {}
+    let results = []
     for (let op of operations) {
       const {operation} = op
       const {args} = op
       const {context} = op
       const operationFunction = this.lookupOperationFunction(context, operation)
-     if (!operationFunction) return
-      const operated = await operationFunction.operation.apply({req}, args)
-      result = Object.assign(result,
-        {
-          [operation]: {
-            ...operated,
-            [Symbol.for("broadcast")]: operationFunction[Symbol.for("broadcast")]
-          }
-        }
-      )
+      if (!operationFunction) {
+        results.push({error: "operation not found"})
+        continue
+      }
+      const result = await operationFunction.operation.apply({req}, args)
+      results.push({
+        ...result,
+        [broadcastSymbol]: operationFunction[Symbol.for("broadcast")]
+      })
     }
-    return result
+    return results
   }
   listen(...args: any[]): http.Server {
     this.server = http.createServer(this.app)
@@ -82,12 +83,20 @@ export class Server {
     }
     this.mount(this.appBase)
     this.app['ws']('/ws', (ws: ws, req: express.Request) => {
-      ws.on('message', message => {
-        this.getOperationResult(JSON.parse(message)['operations'], req)
-          .then((result: {}) => {
-            return Object.keys(result).forEach(key => 
-              result[key][Symbol.for("broadcast")] ? broadcast(JSON.stringify(result)) : ws.send(JSON.stringify(result)))
-          }).catch()
+      ws.on('message', async message => {
+        try {
+          const results = await this.getOperationResult(JSON.parse(message)['operations'], req)
+          for (const result of results) {
+            const json = JSON.stringify(result)
+            if (result[broadcastSymbol]) {
+              broadcast(json)
+            } else {
+              ws.send(json)
+            }
+          }
+        } catch (e) {
+          console.warn(e)
+        }
       })
     })
     return (this.server.listen as any)(...args) as http.Server
