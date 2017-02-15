@@ -35,7 +35,7 @@ export function broadcast(target: any, propertyKey?: string, descriptor?: Proper
   return descriptor
 }
 
-export function op<T>(target: any, propertyKey?: string, descriptor?: TypedPropertyDescriptor<() => Promise<T>>) {
+export function op<T>(target: any, propertyKey?: string, descriptor?: TypedPropertyDescriptor<(...args: any[]) => Promise<T>>) {
   if (!descriptor || !descriptor.value || !propertyKey)
     throw new TypeError("op decorator should apply to method")
   descriptor.value = new OperationFunction(descriptor.value, propertyKey, target) as any

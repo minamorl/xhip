@@ -33,7 +33,7 @@ export class Client {
   get isSocketOpen() {
     return this.socket.readyState === WebSocket.OPEN
   }
-  subscribe<T>(target: () => Promise<T>, receiver: (value: T) => void) {
+  subscribe<T>(target: (...args: any[]) => Promise<T>, receiver: (value: T) => void) {
     this.subscriptions.push({
       target,
       receiver
