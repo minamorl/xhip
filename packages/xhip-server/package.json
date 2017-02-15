@@ -28,7 +28,7 @@
     "request": "^2.79.0",
     "sinon": "^1.17.7",
     "typescript": "^2.1.4",
-    "xhip": "../xhip"
+    "xhip": "^0.1.0"
   },
   "dependencies": {
     "@types/cors": "^2.8.0",
