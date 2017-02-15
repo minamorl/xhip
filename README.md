@@ -86,12 +86,12 @@ client.exec([
   app.getServerIP()
 ]).then(res => {
   // res will be like this:
-  // {
-  //  appName: "xhip example",
-  //  appVersion: 1,
-  //  say: hi,
-  //  ip: ***.***.***.***
-  // }
+  // [
+  //   {appName: "xhip example"},
+  //   {appVersion: 1},
+  //   {say: hi},
+  //   {ip: ***.***.***.***},
+  // ]
 })
 ```
 
@@ -115,9 +115,9 @@ You can inquiry this way:
 ```
 {
   "__xhip": true,
-  "operations": {
-    "your_operation": argument
-  }
+  "operations": [
+    {"your_operation": argument}
+  ]
 }
 ```
 then server must return this way:
