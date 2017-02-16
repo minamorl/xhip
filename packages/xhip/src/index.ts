@@ -25,17 +25,20 @@ export class OperationFunction extends Function {
     return fn as any as OperationFunction
   }
 }
-export const broadcast = (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) => {
+export interface OperationFunction {
+  (...args: any[]): OperationFunctionResult
+}
+export function broadcast(target: any, propertyKey?: string, descriptor?: PropertyDescriptor) {
   if (!descriptor || !descriptor.value || !propertyKey)
     throw new TypeError("broadcast decorator should apply to method")
   descriptor.value[Symbol.for("broadcast")] = true
   return descriptor
 }
 
-export const op = (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) => {
+export function op<T>(target: any, propertyKey?: string, descriptor?: TypedPropertyDescriptor<(...args: any[]) => Promise<T>>) {
   if (!descriptor || !descriptor.value || !propertyKey)
     throw new TypeError("op decorator should apply to method")
-  descriptor.value = new OperationFunction(descriptor.value, propertyKey, target)
+  descriptor.value = new OperationFunction(descriptor.value, propertyKey, target) as any
   // Add static function accessing across client side
   return descriptor
 }

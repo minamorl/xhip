@@ -1,20 +1,23 @@
 import "whatwg-fetch"
+import {OperationFunction} from "xhip"
 
 const ReconnectingWebSocket = require('reconnecting-websocket')
 
-const createResponse = (parsed: any) => Object.assign({}, ...Object.keys(parsed).map(k => parsed[k]))
-
 export class Client {
   socket: WebSocket
-  subscriptions: any[] = []
+  subscriptions: {key: string, receiver: (value: any) => void}[] = []
   constructor(public uri: string, public opts: { ssl: boolean }) {
   }
-  exec = (ops: Array<any>) => {
+  exec<T1>(ops: [Promise<T1>]): Promise<[T1]>
+  exec<T1, T2>(ops: [Promise<T1>, Promise<T2>]): Promise<[T1, T2]>
+  exec<T1, T2, T3>(ops: [Promise<T1>, Promise<T2>, Promise<T3>]): Promise<[T1, T2, T3]>
+  exec<T1, T2, T3, T4>(ops: [Promise<T1>, Promise<T2>, Promise<T3>, Promise<T4>]): Promise<[T1, T2, T3, T4]>
+  async exec(ops: Promise<any>[]) {
     const body = JSON.stringify({
       '__xhip': true,
       'operations': ops
     })
-    return fetch(this.uri, {
+    const res = await fetch(this.uri, {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -22,21 +25,26 @@ export class Client {
       credentials: 'include',
       method: 'POST',
       body
-    }).then(res => {
-      if (res.status >= 400) return Promise.reject(res)
-      return res.json()
-    }).then(createResponse)
+    })
+    if (res.status >= 400) {
+      return Promise.reject(res)
+    }
+    return await res.json()
   }
   get isSocketOpen() {
     return this.socket.readyState === WebSocket.OPEN
   }
-  subscribe(target: Array<any>, receiver: Function) {
+  subscribe<T>(target: (...args: any[]) => Promise<T>, receiver: (value: T) => void) {
     this.subscriptions.push({
-      target,
+      key: (target as any as OperationFunction).key,
       receiver
     })
   }
-  send(ops: Array<any>): void {
+  send<T1>(ops: [Promise<T1>]): void
+  send<T1, T2>(ops: [Promise<T1>, Promise<T2>]): void
+  send<T1, T2, T3>(ops: [Promise<T1>, Promise<T2>, Promise<T3>]): void
+  send<T1, T2, T3, T4>(ops: [Promise<T1>, Promise<T2>, Promise<T3>, Promise<T4>]): void
+  send(ops: Promise<any>[]) {
     if(this.isSocketOpen) {
       this.socket.send(JSON.stringify({
         'operations': ops
@@ -50,10 +58,9 @@ export class Client {
       const parsed = JSON.parse(ev.data)
       const allExecutedOperations = Object.keys(parsed)
       for (let x of this.subscriptions) {
-        const { target } = x
-        const { receiver } = x
-        if (target.some((y: any) => allExecutedOperations.indexOf(y.key) !== -1)) {
-          receiver(createResponse(parsed))
+        const {key, receiver} = x
+        if (parsed.hasOwnProperty(key)) {
+          receiver(parsed[key])
         }
       }
     }

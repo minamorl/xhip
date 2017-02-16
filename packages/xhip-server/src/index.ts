@@ -4,7 +4,9 @@ import * as http from "http"
 import * as cors from "cors"
 import * as ws from "ws"
 
-import {OperationFunction} from "xhip"
+import {OperationFunction, OperationFunctionResult} from "xhip"
+
+const broadcastSymbol = Symbol()
 
 export interface ServerOptions {
   cors?: cors.CorsOptions
@@ -25,7 +27,8 @@ export class Server {
         if (!req.body['operations']) {
           return res.sendStatus(200)
         }
-        const result = await this.getOperationResult(req.body['operations'], req)
+        const operations = req.body.operations as OperationFunctionResult[]
+        const result = await Promise.all(operations.map(op => this.getOperationResult(op, req)))
         res.json(result)
       } else {
         return res.sendStatus(400)
@@ -48,25 +51,20 @@ export class Server {
       return this.lookupOperationFunction(context, operation, currentBase[protoName])
     return names.map(name => this.lookupOperationFunction(context, operation, currentBase[name]))[0] || null
   }
-  async getOperationResult(operations: any[], req: express.Request) {
-    let result = {}
-    for (let op of operations) {
-      const {operation} = op
-      const {args} = op
-      const {context} = op
-      const operationFunction = this.lookupOperationFunction(context, operation)
-     if (!operationFunction) return
-      const operated = await operationFunction.operation.apply({req}, args)
-      result = Object.assign(result,
-        {
-          [operation]: {
-            ...operated,
-            [Symbol.for("broadcast")]: operationFunction[Symbol.for("broadcast")]
-          }
-        }
-      )
+  async getOperationResult(op: OperationFunctionResult, req: express.Request) {
+    let results = []
+    const {operation} = op
+    const {args} = op
+    const {context} = op
+    const operationFunction = this.lookupOperationFunction(context, operation)
+    if (!operationFunction) {
+      return {error: "operation not found"}
     }
-    return result
+    const result = await operationFunction.operation.apply({req}, args)
+    return {
+      ...result,
+      [broadcastSymbol]: operationFunction[Symbol.for("broadcast")]
+    }
   }
   listen(...args: any[]): http.Server {
     this.server = http.createServer(this.app)
@@ -82,12 +80,21 @@ export class Server {
     }
     this.mount(this.appBase)
     this.app['ws']('/ws', (ws: ws, req: express.Request) => {
-      ws.on('message', message => {
-        this.getOperationResult(JSON.parse(message)['operations'], req)
-          .then((result: {}) => {
-            return Object.keys(result).forEach(key => 
-              result[key][Symbol.for("broadcast")] ? broadcast(JSON.stringify(result)) : ws.send(JSON.stringify(result)))
-          }).catch()
+      ws.on('message', async message => {
+        try {
+          const operations = JSON.parse(message).operations as OperationFunctionResult[]
+          for (const op of operations) {
+            const result = await this.getOperationResult(op, req)
+            const json = JSON.stringify({[op.operation]: result})
+            if (result[broadcastSymbol]) {
+              broadcast(json)
+            } else {
+              ws.send(json)
+            }
+          }
+        } catch (e) {
+          console.warn(e)
+        }
       })
     })
     return (this.server.listen as any)(...args) as http.Server
