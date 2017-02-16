@@ -86,12 +86,12 @@ client.exec([
   app.getServerIP()
 ]).then(res => {
   // res will be like this:
-  // {
-  //  appName: "xhip example",
-  //  appVersion: 1,
-  //  say: hi,
-  //  ip: ***.***.***.***
-  // }
+  // [
+  //   {appName: "xhip example"},
+  //   {appVersion: 1},
+  //   {say: hi},
+  //   {ip: ***.***.***.***},
+  // ]
 })
 ```
 
@@ -115,9 +115,9 @@ You can inquiry this way:
 ```
 {
   "__xhip": true,
-  "operations": {
-    "your_operation": argument
-  }
+  "operations": [
+    {"your_operation": argument}
+  ]
 }
 ```
 then server must return this way:
@@ -138,3 +138,11 @@ Most is same but no need to append "__xhip" mark.
 ## Limitation
 - Any operation must returns JSON object which can be combined with other operations.
 - Not as usual importation, we have to use `Xhip.load` for support isomorphism inside app.
+
+## Development
+
+Xhip uses [Lerna](https://github.com/lerna/lerna) for monorepo-style development.
+
+- `lerna exec -- npm install` - install all dependencies (you cannot use `lerna bootstrap` for now)
+- `lerna run test` - test all packages
+- `lerna publish` - publish packages

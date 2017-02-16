@@ -7,7 +7,7 @@ import { op, broadcast, Application } from "xhip"
 import * as WebSocket from "ws"
 
 class TestMixinMixin extends Application {
-  @op echo() {
+  @op async echo() {
     return {
       'this': 'is from TestMixinMixin'
     }
@@ -16,7 +16,7 @@ class TestMixinMixin extends Application {
 
 class TestMixin extends Application {
   testMixinMixin = new TestMixinMixin
-  @op echo() {
+  @op async echo() {
     return {
       'this': 'is from TestMixin'
     }
@@ -25,29 +25,29 @@ class TestMixin extends Application {
 
 class TestBaseApp extends Application {
   testMixin = new TestMixin()
-  @op showAppName() {
+  @op async showAppName() {
     return {
       "appName": "Xhip"
     }
   }
-  @op echo(say: any) {
+  @op async echo(say: any) {
     return {say}
   }
   @op asyncfn() {
     return Promise.resolve({ supportAsync: "yes" })
   }
-  @op ping() {
+  @op async ping() {
     return {
       "ping": "pong"
     }
   }
   @broadcast
-  @op broadcaster() {
+  @op async broadcaster() {
     return {
       "ping": "pong"
     }
   }
-  @op ip() {
+  @op async ip() {
     return {
       ip: this.req.ip
     }
@@ -107,14 +107,14 @@ describe('Server', () => {
       })
     }).then((res) => {
       assert.strictEqual(res.status, 200)
-      return res.json().then(x => assert.deepEqual(x, {
-        showAppName: {
+      return res.json().then(x => assert.deepEqual(x, [
+        {
           appName: "Xhip"
         }, 
-        echo: {
+        {
           say: 'hi'
         }
-      }))
+      ]))
     })
   })
   it('can replace req object as actual one', () => {
@@ -131,11 +131,11 @@ describe('Server', () => {
       })
     }).then((res) => {
       assert.strictEqual(res.status, 200)
-      return res.json().then(x => assert.deepEqual(x, {
-        ip: {
+      return res.json().then(x => assert.deepEqual(x, [
+        {
           ip: "::ffff:127.0.0.1"
         }
-      }))
+      ]))
     })
   })
   it('can search mixins', () => {
