@@ -72,15 +72,14 @@ describe('Server', () => {
     const server = express()
     server.use(new Server(testBaseApp, {}).app)
   })
-  it('returns 400 when received without __ship signature', () => {
-    return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
+  it('returns 400 when received without __ship signature', async () => {
+    const res = await fetch(`http://127.0.0.1:${app.server.address().port}/`, {
       method: 'POST'
-    }).then((res) => {
-      assert.strictEqual(res.status, 400)
     })
+    assert.strictEqual(res.status, 400)
   })
-  it('returns 200 with correct calls', () => {
-    return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
+  it('returns 200 with correct calls', async () => {
+    const res = await fetch(`http://127.0.0.1:${app.server.address().port}/`, {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -88,12 +87,11 @@ describe('Server', () => {
       body: JSON.stringify({
         '__xhip': true,
       })
-    }).then((res) => {
-      assert.strictEqual(res.status, 200)
     })
+    assert.strictEqual(res.status, 200)
   })
-  it('returns transformed json', () => {
-    return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
+  it('returns transformed json', async () => {
+    const res = await fetch(`http://127.0.0.1:${app.server.address().port}/`, {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -105,20 +103,20 @@ describe('Server', () => {
           testBaseApp.echo('hi')
         ]
       })
-    }).then((res) => {
-      assert.strictEqual(res.status, 200)
-      return res.json().then(x => assert.deepEqual(x, [
-        {
-          appName: "Xhip"
-        }, 
-        {
-          say: 'hi'
-        }
-      ]))
     })
+    assert.strictEqual(res.status, 200)
+    const json = await res.json()
+    assert.deepEqual(json, [
+      {
+        appName: "Xhip"
+      }, 
+      {
+        say: 'hi'
+      }
+    ])
   })
-  it('can replace req object as actual one', () => {
-    return fetch(`http://127.0.0.1:${app.server.address().port}/`, {
+  it('can replace req object as actual one', async () => {
+    const res = await fetch(`http://127.0.0.1:${app.server.address().port}/`, {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -129,14 +127,14 @@ describe('Server', () => {
           testBaseApp.ip()
         ]
       })
-    }).then((res) => {
-      assert.strictEqual(res.status, 200)
-      return res.json().then(x => assert.deepEqual(x, [
-        {
-          ip: "::ffff:127.0.0.1"
-        }
-      ]))
     })
+    assert.strictEqual(res.status, 200)
+    const json = await res.json()
+    assert.deepEqual(json, [
+      {
+        ip: "::ffff:127.0.0.1"
+      }
+    ])
   })
   it('can search mixins', () => {
     const fn = app.lookupOperationFunction('TestMixin', 'echo')
