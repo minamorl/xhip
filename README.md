@@ -143,6 +143,6 @@ Most is same but no need to append "__xhip" mark.
 
 Xhip uses [Lerna](https://github.com/lerna/lerna) for monorepo-style development.
 
-- `lerna exec -- npm install` - install all dependencies (you cannot use `lerna bootstrap` for now)
+- `lerna bootstrap` - install all dependencies and link dependencies in the repo together
 - `lerna run test` - test all packages
 - `lerna publish` - publish packages
