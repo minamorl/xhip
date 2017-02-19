@@ -37,14 +37,10 @@ export class Client {
       receiver
     })
   }
-  send<T1>(ops: [Promise<T1>]): void
-  send<T1, T2>(ops: [Promise<T1>, Promise<T2>]): void
-  send<T1, T2, T3>(ops: [Promise<T1>, Promise<T2>, Promise<T3>]): void
-  send<T1, T2, T3, T4>(ops: [Promise<T1>, Promise<T2>, Promise<T3>, Promise<T4>]): void
-  send(ops: Promise<any>[]) {
+  send<T>(op: Promise<T>) {
     if(this.isSocketOpen) {
       this.socket.send(JSON.stringify({
-        'operations': ops
+        'operation': op
       }))
     }
   }
