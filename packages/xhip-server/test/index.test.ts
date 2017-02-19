@@ -52,6 +52,9 @@ class TestBaseApp extends Application {
       ip: this.req.ip
     }
   }
+  @op async failing() {
+    throw new Error("error!")
+  }
 }
 const testBaseApp = new TestBaseApp()
 describe('Server', () => {
@@ -98,22 +101,36 @@ describe('Server', () => {
       method: 'POST',
       body: JSON.stringify({
         '__xhip': true,
-        operations: [
-          testBaseApp.showAppName(),
-          testBaseApp.echo('hi')
-        ]
+        operation: testBaseApp.echo('hi'),
       })
     })
     assert.strictEqual(res.status, 200)
     const json = await res.json()
-    assert.deepEqual(json, [
-      {
-        appName: "Xhip"
-      }, 
-      {
+    assert.deepEqual(json, {
+      result: {
         say: 'hi'
       }
-    ])
+    })
+  })
+  it('returns error if error occured in op', async () => {
+    const res = await fetch(`http://127.0.0.1:${app.server.address().port}/`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        '__xhip': true,
+        operation: testBaseApp.failing()
+      })
+    })
+    assert.strictEqual(res.status, 200)
+    const json = await res.json()
+    assert.deepEqual(json, {
+      error: {
+        name: "Error",
+        message: "error!"
+      }
+    })
   })
   it('can replace req object as actual one', async () => {
     const res = await fetch(`http://127.0.0.1:${app.server.address().port}/`, {
@@ -123,18 +140,16 @@ describe('Server', () => {
       method: 'POST',
       body: JSON.stringify({
         '__xhip': true,
-        'operations': [
-          testBaseApp.ip()
-        ]
+        'operation': testBaseApp.ip(),
       })
     })
     assert.strictEqual(res.status, 200)
     const json = await res.json()
-    assert.deepEqual(json, [
-      {
+    assert.deepEqual(json, {
+      result: {
         ip: "::ffff:127.0.0.1"
       }
-    ])
+    })
   })
   it('can search mixins', () => {
     const fn = app.lookupOperationFunction('TestMixin', 'echo')
@@ -156,9 +171,7 @@ describe('Server', () => {
   it('can handle WebSocket request', (done) => {
     socket.on('open', () => {
       socket.send(JSON.stringify({
-        operations: [
-          testBaseApp.echo('hello')
-        ]
+        operation: testBaseApp.echo('hello')
       }))
     })
 
@@ -187,9 +200,7 @@ describe('Server', () => {
       })
       ws1.on('open', () => {
         ws1.send(JSON.stringify({
-          operations: [
-            testBaseApp.broadcaster()
-          ]
+          operation: testBaseApp.broadcaster()
         }))
       })
     })

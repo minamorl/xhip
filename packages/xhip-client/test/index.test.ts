@@ -5,9 +5,9 @@ import * as fetchMock from "fetch-mock"
 import {Application, op} from "xhip"
 
 fetchMock.post("*", JSON.stringify(
-  [{
+  {
     a: "b"
-  }]
+  }
 ))
 
 global["URL"] = sinon.mock()
@@ -26,7 +26,7 @@ describe('Client', () => {
     it('should creatable from test', async () => {
       const client = new Client("http://www.example.com/", { ssl: false })
       const app = new Test()
-      const [result] = await client.exec([app.a()])
+      const result = await client.exec(app.a())
       assert.deepEqual(result, {
         a: "b"
       })
