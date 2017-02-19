@@ -53,6 +53,9 @@ export class App extends Application {
   @op echo(say) {
     return { say }
   }
+  @op throwError() {
+    throw new Error("error occured!!")
+  }
 }
 export const app = new App()
 ```
@@ -79,20 +82,11 @@ Client-side(client.js):
 import { Client } from "xhip-client"
 
 const client = new xhip.Client("http://localhost:8080/", { ssl: false })
-client.exec([
-  app.showAppName(),
-  app.showAppVersion(),
-  app.echo("hi"),
-  app.getServerIP()
-]).then(res => {
-  // res will be like this:
-  // [
-  //   {appName: "xhip example"},
-  //   {appVersion: 1},
-  //   {say: hi},
-  //   {ip: ***.***.***.***},
-  // ]
-})
+await client.exec(app.showAppName()) // => {appName: "xhip example"}
+await client.exec(app.showAppVersion()) // => {appVersion: 1}
+await client.exec(app.echo("hi") // => {say: hi}
+await client.exec(app.getServerIP()) // => {ip: ***.***.***.***}
+await client.exec(app.throwError()) // => throws {name: "Error", message: "error occured!!"}
 ```
 
 ## How it works
@@ -112,18 +106,20 @@ From client side, it will become to argument generator which will be posted into
 Xhip do everything in POST method.
 
 You can inquiry this way:
-```
+```json
 {
   "__xhip": true,
-  "operations": [
-    {"your_operation": argument}
-  ]
+  "operation": {"your_operation": argument}
 }
 ```
 then server must return this way:
-```
+```json
 {
-  "your_operation": result  
+  "result": result
+}
+or
+{
+  "error": error
 }
 ```
 
