@@ -26,7 +26,11 @@ export class Client {
       return Promise.reject(res)
     }
     const result = await res.json()
-    return result as T
+    if (result.result) {
+      return result.result
+    } else {
+      throw result.error
+    }
   }
   get isSocketOpen() {
     return this.socket.readyState === WebSocket.OPEN
