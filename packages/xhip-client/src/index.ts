@@ -8,14 +8,10 @@ export class Client {
   subscriptions: {key: string, receiver: (value: any) => void}[] = []
   constructor(public uri: string, public opts: { ssl: boolean }) {
   }
-  exec<T1>(ops: [Promise<T1>]): Promise<[T1]>
-  exec<T1, T2>(ops: [Promise<T1>, Promise<T2>]): Promise<[T1, T2]>
-  exec<T1, T2, T3>(ops: [Promise<T1>, Promise<T2>, Promise<T3>]): Promise<[T1, T2, T3]>
-  exec<T1, T2, T3, T4>(ops: [Promise<T1>, Promise<T2>, Promise<T3>, Promise<T4>]): Promise<[T1, T2, T3, T4]>
-  async exec(ops: Promise<any>[]) {
+  async exec<T>(op: Promise<T>) {
     const body = JSON.stringify({
       '__xhip': true,
-      'operations': ops
+      'operation': op
     })
     const res = await fetch(this.uri, {
       headers: {
@@ -29,7 +25,12 @@ export class Client {
     if (res.status >= 400) {
       return Promise.reject(res)
     }
-    return await res.json()
+    const result = await res.json()
+    if (result.result) {
+      return result.result
+    } else {
+      throw result.error
+    }
   }
   get isSocketOpen() {
     return this.socket.readyState === WebSocket.OPEN
@@ -40,14 +41,10 @@ export class Client {
       receiver
     })
   }
-  send<T1>(ops: [Promise<T1>]): void
-  send<T1, T2>(ops: [Promise<T1>, Promise<T2>]): void
-  send<T1, T2, T3>(ops: [Promise<T1>, Promise<T2>, Promise<T3>]): void
-  send<T1, T2, T3, T4>(ops: [Promise<T1>, Promise<T2>, Promise<T3>, Promise<T4>]): void
-  send(ops: Promise<any>[]) {
+  send<T>(op: Promise<T>) {
     if(this.isSocketOpen) {
       this.socket.send(JSON.stringify({
-        'operations': ops
+        'operation': op
       }))
     }
   }

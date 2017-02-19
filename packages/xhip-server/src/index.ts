@@ -24,12 +24,16 @@ export class Server {
   mount(appBase: any) {
     this.app.post('/', async (req, res) => {
       if (req.body['__xhip']) {
-        if (!req.body['operations']) {
+        if (!req.body['operation']) {
           return res.sendStatus(200)
         }
-        const operations = req.body.operations as OperationFunctionResult[]
-        const result = await Promise.all(operations.map(op => this.getOperationResult(op, req)))
-        res.json(result)
+        const op = req.body.operation as OperationFunctionResult
+        try {
+          const result = await this.getOperationResult(op, req)
+          res.json({result})
+        } catch (error) {
+          res.json({error: this.serializeError(error)})
+        }
       } else {
         return res.sendStatus(400)
       }
@@ -50,6 +54,10 @@ export class Server {
     if (protoName)
       return this.lookupOperationFunction(context, operation, currentBase[protoName])
     return names.map(name => this.lookupOperationFunction(context, operation, currentBase[name]))[0] || null
+  }
+  serializeError(e: any) {
+    const {name, message} = e
+    return {name, message}
   }
   async getOperationResult(op: OperationFunctionResult, req: express.Request) {
     let results = []
@@ -82,15 +90,13 @@ export class Server {
     this.app['ws']('/ws', (ws: ws, req: express.Request) => {
       ws.on('message', async message => {
         try {
-          const operations = JSON.parse(message).operations as OperationFunctionResult[]
-          for (const op of operations) {
-            const result = await this.getOperationResult(op, req)
-            const json = JSON.stringify({[op.operation]: result})
-            if (result[broadcastSymbol]) {
-              broadcast(json)
-            } else {
-              ws.send(json)
-            }
+          const op = JSON.parse(message).operation as OperationFunctionResult
+          const result = await this.getOperationResult(op, req)
+          const json = JSON.stringify({[op.operation]: result})
+          if (result[broadcastSymbol]) {
+            broadcast(json)
+          } else {
+            ws.send(json)
           }
         } catch (e) {
           console.warn(e)
